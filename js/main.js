@@ -8,9 +8,11 @@ d3.dsv("|", '/data/cincy311_cleaned_partial.tsv')
       d.longitude = +d.longitude; //make sure these are not strings
       d.latitude = +d.latitude; //make sure these are not strings
       d.requested_datetime = new Date(d.requested_datetime).toDateString();
+      d.service_code = d.service_code.replace(/["]+/g, "")
     });
 
     // Initialize chart and then show it
+    //colorsOption = new colorsOption({parentElement: '#map-colors'}, format_map_option_data(format_barchart(data, "service_code"), "service_code"));
     leafletMap = new LeafletMap({ parentElement: '#my-map'}, data);
 
     requested_datetime_linechart = new FocusContextVis({parentElement: '#requested_datetime_linechart'}, 
@@ -35,3 +37,19 @@ function chart_sort(chart){
   chart.data.sort((a,b) => a.x - b.x);
   return;
 }
+
+// Event Listeners 
+
+d3.select('#map-background').on('click', d=> {
+  leafletMap.mapType += 1;
+  leafletMap.updateLayer();
+});
+
+d3.select('#colors').on('change', d => {
+  selection = document.getElementById('colors');
+  color_sel = selection.options[selection.selectedIndex].value;
+  console.log(color_sel)
+  leafletMap.colorType = color_sel;
+  leafletMap.updateLegend();
+  leafletMap.updateVis();
+})

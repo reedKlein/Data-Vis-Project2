@@ -48,8 +48,12 @@ class FocusContextVis {
           .nice();
   
       // Initialize axes
-      vis.xAxisFocus = d3.axisBottom(vis.xScaleFocus).tickSizeOuter(0);
-      vis.xAxisContext = d3.axisBottom(vis.xScaleContext).tickSizeOuter(0);
+      vis.xAxisFocus = d3.axisBottom(vis.xScaleFocus).tickSizeOuter(0).tickFormat(d => {
+        return `${d.getMonth()}-${d.getDate()}`;
+      });
+      vis.xAxisContext = d3.axisBottom(vis.xScaleContext).tickSizeOuter(0).tickFormat(d => {
+        return `${d.getMonth()}-${d.getDate()}`;
+      });
       vis.yAxisFocus = d3.axisLeft(vis.yScaleFocus);
   
       // Define size of SVG drawing area
@@ -63,7 +67,7 @@ class FocusContextVis {
   
       vis.focus.append('defs').append('clipPath')
           .attr('id', 'clip')
-            .append('rect')
+        .append('rect')
           .attr('width', vis.config.width)
           .attr('height', vis.config.height);
       
@@ -80,7 +84,6 @@ class FocusContextVis {
       vis.tooltipTrackingArea = vis.focus.append('rect')
           .attr('width', vis.config.width)
           .attr('height', vis.config.height)
-          .attr('class', 'lineClip')
           .attr('fill', 'none')
           .attr('pointer-events', 'all');
   
@@ -188,7 +191,7 @@ class FocusContextVis {
             const index = vis.bisectDate(vis.data, date, 1);
             const a = vis.data[index - 1];
             const b = vis.data[index];
-            const d = b && (date - a.date > b.date - date) ? a : b; 
+            const d = b && (date - a.date > b.date - date) ? b : a; 
   
             // Update tooltip
             vis.tooltip.select('circle')

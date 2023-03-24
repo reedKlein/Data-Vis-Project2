@@ -7,7 +7,18 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div id="my-map"></div>
+    <div class="map">
+        <div id="my-map"></div>
+        <div id="map-options">
+            <button type="button" class="buttons" id="map-background">Map Type Toggle</button>
+            <svg id="map-colors"></svg>
+            <label for="colors">Color By:</label>
+            <select name="colors" id="colors">
+                <option value="default">Monochromatic</option>
+                <option value="service_code">service code</option>
+            </select>
+        </div>
+    </div>
     <div>
         <svg id="requested_datetime_linechart"></svg>
     </div>
@@ -17,6 +28,7 @@
 
 
     <script src="js/linechartFocus.js"></script>
+    <script src="js/colorsOption.js"></script>
     <script src="js/main.js"></script>
     <script src="js/leafletMap.js"></script>
 

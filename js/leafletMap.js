@@ -10,8 +10,10 @@ class LeafletMap {
       parentElement: _config.parentElement,
     }
     console.log(_data);
+    this.colorType = "default";
     this.data = _data;
     this.initVis();
+    this.initLegend();
   }
   
   /**
@@ -19,6 +21,8 @@ class LeafletMap {
    */
   initVis() {
     let vis = this;
+
+    // vis.colorsOption = new colorsOption({parentElement: '#map-colors'}, vis.formatColors(vis.data, "service_code"));
 
     //ESRI
     vis.esriUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
@@ -36,8 +40,11 @@ class LeafletMap {
     vis.stUrl = 'https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}';
     vis.stAttr = 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
+    vis.urlList = [vis.stUrl, vis.topoUrl, vis.esriUrl];
+    vis.mapType = 0;
+  
     //this is the base map layer, where we are showing the map background
-    vis.base_layer = L.tileLayer(vis.stUrl, {
+    vis.base_layer = L.tileLayer(vis.urlList[vis.mapType], {
       id: 'esri-image',
       attribution: vis.esriAttr,
       ext: 'png'
@@ -72,14 +79,15 @@ class LeafletMap {
                             d3.select(this).transition() //D3 selects the object we have moused over in order to perform operations on it
                               .duration('150') //how long we are transitioning between the two states (works like keyframes)
                               .attr("fill", "red") //change the fill
-                              .attr('r', 2); //change radius
+                              .attr('r', 5); //change radius
 
                             //create a tool tip
                             d3.select('#tooltip')
                                 .style('opacity', 1)
                                 .style('z-index', 1000000)
                                   // Format number with million and thousand separator
-                                .html(`<div class="tooltip-label">Address ${d.ADDRESS}, Date: ${(d.REQUESTED_DATE)}</div>`);
+                                .html(`<div class="tooltip-label">Requested Date ${d.requested_date}, Updated Date: ${(d.updated_date)}
+                                      Agency Responsible: ${(d.agency_responsible)} Description: ${(d.description)}</div>`);
 
                           })
                         .on('mousemove', (event) => {
@@ -106,6 +114,7 @@ class LeafletMap {
     
     //handler here for updating the map, as you zoom in and out           
     vis.theMap.on("zoomend", function(){
+      vis.updateLegend();
       vis.updateVis();
     });
 
@@ -118,7 +127,7 @@ class LeafletMap {
     // console.log(vis.map.getZoom()); //how zoomed am I
     
     //want to control the size of the radius to be a certain number of meters? 
-    vis.radiusSize = 2; 
+    vis.radiusSize = 3; 
 
     // if( vis.theMap.getZoom > 15 ){
     //   metresPerPixel = 40075016.686 * Math.abs(Math.cos(map.getCenter().lat * Math.PI/180)) / Math.pow(2, map.getZoom()+8);
@@ -130,7 +139,8 @@ class LeafletMap {
     vis.Dots
       .attr("cx", d => vis.theMap.latLngToLayerPoint([d.latitude,d.longitude]).x)
       .attr("cy", d => vis.theMap.latLngToLayerPoint([d.latitude,d.longitude]).y)
-      .attr("r", vis.radiusSize) ;
+      .attr("r", vis.radiusSize)
+      .attr("fill", function(d){return vis.colors(d[vis.colorType]) }) ;
 
   }
 
@@ -141,4 +151,83 @@ class LeafletMap {
     //not using right now... 
  
   }
+
+  updateLayer() {
+    let vis = this;
+    vis.mapType = vis.mapType % 3;
+    vis.theMap.removeLayer(vis.base_layer);
+    vis.base_layer = L.tileLayer(vis.urlList[vis.mapType], {
+      id: 'esri-image',
+      attribution: vis.esriAttr,
+      ext: 'png'
+    });
+    vis.base_layer.addTo(vis.theMap);
+  }
+
+  formatColorsData(data, field){
+      let data_rollup = d3.rollup(data, v => v.length, d => d[field])
+      let myObjStruct = Object.assign(Array.from(data_rollup).map(([k, v]) => ({"x": k, "y" : v})));
+      let retData = [];
+      if(field == "service_code"){
+        myObjStruct.sort((a, b) => b.y - a.y);
+        retData = myObjStruct.slice(0,9);
+        retData.push({x: "other", y: myObjStruct.slice(9, myObjStruct.length).reduce((partialSum, a) => partialSum + a.y, 0)});
+      }
+      return retData
+    }
+
+    initLegend(){      
+      let vis = this;
+
+      vis.legend_svg = d3.select("#map-colors")
+          .attr('width', 1000)
+          .attr('height', 100);
+      
+      vis.legend_chart = vis.legend_svg.append('g');
+  
+      vis.updateLegend();
+    }
+
+  updateLegend(){
+    let vis = this;
+      // Create data THIS IS FOR LINEAR DATA
+      //vis.colordata = Array.from({length:vis.data.length}, (e, i) => i+4); for scale
+      // Option 1: give 2 color names
+      // vis.colors = d3.scaleLinear().domain([2,10])
+      //     .range(["white", "blue"])
+      // vis.chart.selectAll(".firstrow")
+      //     .data(vis.colordata)
+      //     .enter()
+      //     .append("circle")
+      //     .attr("cx", function(d,i){return 30 + i*60})
+      //     .attr("cy", 50)
+      //     .attr("r", 19)
+      //     .attr("fill", function(d){return vis.colors(d) })
+    
+    vis.legend_data = vis.formatColorsData(vis.data, vis.colorType);
+    vis.legend_colordata = vis.legend_data.map(a => a.x);
+
+    vis.colors = d3.scaleOrdinal().domain(vis.legend_colordata)
+        .range(d3.schemeSet1)
+    vis.legend_chart.selectAll(".firstrow")
+        .data(vis.legend_colordata)
+        .enter()
+        .append("circle")
+        .attr("cx", function(d,i){return 30 + i*60})
+        .attr("cy", 50)
+        .attr("r", 19)
+        .attr("fill", function(d){return vis.colors(d) })
+    vis.legend_chart.selectAll("labels")
+      .data(vis.legend_colordata)
+      .enter()
+      .append("text")
+      .attr("x", function(d,i){return 20 + i*60})
+      .style("fill", function(d){return vis.colors(d)})
+      .attr("y", 90)
+      .text(function(d){return d})
+  }
 }
+
+
+
+  
