@@ -8,7 +8,11 @@ d3.dsv("|", '/data/cincy311_cleaned_partial.tsv')
       d.longitude = +d.longitude; //make sure these are not strings
       d.latitude = +d.latitude; //make sure these are not strings
       d.requested_datetime = new Date(d.requested_datetime).toDateString();
-      d.service_code = d.service_code.replace(/["]+/g, "")
+      d.service_code = d.service_code.replace(/["]+/g, "");
+      d.updated_date = new Date(d.updated_date);
+      d.requested_date = new Date(d.requested_date)
+      d.updateTime = Math.ceil(Math.abs(d.updated_date - d.requested_date)/(1000 * 60 * 60 * 24)); // Time in days between request and update
+      d.request_into_year = d.requested_date.getMonth();
     });
 
     // Initialize chart and then show it
@@ -48,7 +52,6 @@ d3.select('#map-background').on('click', d=> {
 d3.select('#colors').on('change', d => {
   selection = document.getElementById('colors');
   color_sel = selection.options[selection.selectedIndex].value;
-  console.log(color_sel)
   leafletMap.colorType = color_sel;
   leafletMap.updateLegend();
   leafletMap.updateVis();

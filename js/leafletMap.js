@@ -140,7 +140,15 @@ class LeafletMap {
       .attr("cx", d => vis.theMap.latLngToLayerPoint([d.latitude,d.longitude]).x)
       .attr("cy", d => vis.theMap.latLngToLayerPoint([d.latitude,d.longitude]).y)
       .attr("r", vis.radiusSize)
-      .attr("fill", function(d){return vis.colors(d[vis.colorType]) }) ;
+      .attr("fill", function(d){return vis.colors(d[vis.colorType]) })
+      // Need to update this because we're changing it back to its changed color rather than steelblue
+      .on('mouseleave', function() { //function to add mouseover event
+        d3.select(this).transition() //D3 selects the object we have moused over in order to perform operations on it
+          .duration('150') //how long we are transitioning between the two states (works like keyframes)
+          .attr("fill", function(d){return vis.colors(d[vis.colorType]) }) //change the fill
+          .attr('r', 3) //change radius
+        d3.select('#tooltip').style('opacity', 0);//turn off the tooltip
+      })
 
   }
 
@@ -173,6 +181,9 @@ class LeafletMap {
         retData = myObjStruct.slice(0,9);
         retData.push({x: "other", y: myObjStruct.slice(9, myObjStruct.length).reduce((partialSum, a) => partialSum + a.y, 0)});
       }
+      else{
+        retData = myObjStruct;
+      }
       return retData
     }
 
@@ -182,7 +193,7 @@ class LeafletMap {
       vis.legend_svg = d3.select("#map-colors")
           .attr('width', 1000)
           .attr('height', 100);
-      
+
       vis.legend_chart = vis.legend_svg.append('g');
   
       vis.updateLegend();
@@ -190,41 +201,49 @@ class LeafletMap {
 
   updateLegend(){
     let vis = this;
-      // Create data THIS IS FOR LINEAR DATA
-      //vis.colordata = Array.from({length:vis.data.length}, (e, i) => i+4); for scale
-      // Option 1: give 2 color names
-      // vis.colors = d3.scaleLinear().domain([2,10])
-      //     .range(["white", "blue"])
-      // vis.chart.selectAll(".firstrow")
-      //     .data(vis.colordata)
-      //     .enter()
-      //     .append("circle")
-      //     .attr("cx", function(d,i){return 30 + i*60})
-      //     .attr("cy", 50)
-      //     .attr("r", 19)
-      //     .attr("fill", function(d){return vis.colors(d) })
-    
+
+    // .join doesn't dynamically update data (idk why), so on update event listner remove and then add the group each update.
+    vis.legend_chart.remove();
+    vis.legend_chart = vis.legend_svg.append('g');
+
     vis.legend_data = vis.formatColorsData(vis.data, vis.colorType);
     vis.legend_colordata = vis.legend_data.map(a => a.x);
+    vis.legend_colordata.sort((a,b) => a - b);
+    vis._setDataColor();
 
-    vis.colors = d3.scaleOrdinal().domain(vis.legend_colordata)
-        .range(d3.schemeSet1)
     vis.legend_chart.selectAll(".firstrow")
         .data(vis.legend_colordata)
-        .enter()
-        .append("circle")
+          .join("circle")
         .attr("cx", function(d,i){return 30 + i*60})
         .attr("cy", 50)
         .attr("r", 19)
         .attr("fill", function(d){return vis.colors(d) })
     vis.legend_chart.selectAll("labels")
       .data(vis.legend_colordata)
-      .enter()
-      .append("text")
-      .attr("x", function(d,i){return 20 + i*60})
+        .join("text")
+      .attr("x", function(d,i){return 25 + i*60})
       .style("fill", function(d){return vis.colors(d)})
       .attr("y", 90)
       .text(function(d){return d})
+  }
+
+  _setDataColor(data){
+    let vis = this;
+    if(vis.colorType == "default"){
+      vis.colors = function(){return "steelblue"};
+    }
+    else if(vis.colorType == "service_code" || vis.colorType == "agency_responsible"){
+      vis.colors = d3.scaleOrdinal().domain(vis.legend_colordata)
+        .range(d3.schemeSet2)
+    }
+    else if(vis.colorType == "updateTime"){
+      vis.colors = d3.scaleLinear().domain([0, 30])
+        .range(["green", "red"]);
+    }
+    else if(vis.colorType == "request_into_year"){
+      vis.colors = d3.scaleLinear().domain([10, 11])
+        .range(["green", "red"]);
+    }
   }
 }
 

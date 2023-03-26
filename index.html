@@ -11,11 +11,16 @@
         <div id="my-map"></div>
         <div id="map-options">
             <button type="button" class="buttons" id="map-background">Map Type Toggle</button>
-            <svg id="map-colors"></svg>
+            <div id="map-colors-div">
+                <svg id="map-colors"></svg>
+            </div>
             <label for="colors">Color By:</label>
             <select name="colors" id="colors">
                 <option value="default">Monochromatic</option>
                 <option value="service_code">service code</option>
+                <option value="updateTime">update time</option>
+                <option value="request_into_year">request date</option>
+                <option value="agency_responsible">agency</option>
             </select>
         </div>
     </div>
