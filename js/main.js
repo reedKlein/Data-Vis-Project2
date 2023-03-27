@@ -8,7 +8,9 @@ d3.dsv("|", '/data/cincy311_cleaned_partial.tsv')
       d.longitude = +d.longitude; //make sure these are not strings
       d.latitude = +d.latitude; //make sure these are not strings
       d.requested_datetime = new Date(d.requested_datetime).toDateString();
+      d.requested_day = new Date(d.requested_date).getDay();
       d.service_code = d.service_code.replace(/["]+/g, "");
+      d.service_name = d.service_name.replace(/["]+/g, "");
       d.updated_date = new Date(d.updated_date);
       d.requested_date = new Date(d.requested_date)
       d.updateTime = Math.ceil(Math.abs(d.updated_date - d.requested_date)/(1000 * 60 * 60 * 24)); // Time in days between request and update
@@ -25,6 +27,26 @@ d3.dsv("|", '/data/cincy311_cleaned_partial.tsv')
     
     chart_sort(requested_datetime_linechart);
     requested_datetime_linechart.updateVis();
+
+    requested_day_barchart = new Barchart({parentElement: '#requested_day_barchart'},
+                                                        format_barchart(data, "requested_day"),
+                                                        "requested_day");
+    requested_day_barchart.updateVis();
+
+    service_name_barchart = new Barchart({parentElement: '#service_name_barchart'},
+                                                        format_barchart(data, "service_name"),
+                                                        "service_name");
+    service_name_barchart.updateVis();
+
+    zipcode_barchart = new Barchart({parentElement: '#zipcode_barchart'},
+                                                        format_barchart(data, "zipcode"),
+                                                        "zipcode");
+    zipcode_barchart.updateVis();
+
+    update_time_histogram = new Histogram({ parentElement: '#update_time_chart'}, 
+                                    data, 
+                                    "updateTime");
+    update_time_histogram.updateVis();
 
   })
   .catch(error => console.error(error));
