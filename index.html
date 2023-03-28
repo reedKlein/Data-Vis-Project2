@@ -1,47 +1,64 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Interactive map with Leaflet</title>
     <link rel="icon" href="data:;base64,iVBORwOKGO=" />
     <link rel="stylesheet" href="css/leaflet.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-    <div class="map">
-        <div id="my-map"></div>
-        <div id="map-options">
+
+<body onLoad="document.getElementById('colors').options[0].selected = 'selected';">
+    <div id="my-map"></div>
+    <div id="map-options">
+        <div id="button-bar">
             <button type="button" class="buttons" id="map-background">Map Type Toggle</button>
+            <button type="button" class="buttons" id="sidebar-button" onclick="openNav()">&#9776;</button>
+        </div>
+    </div>
+    <div id="sidebar" class="sidebar">
+        <div id="sidebar-toolbar">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+            <button type="button" class="buttons" onclick="toggleColor()" id="color-button">Color</button>
+            <button type="button" class="buttons" onclick="toggleGraph()" id="graph-button">Graphs</button>
+        </div>
+        <div id="color-selection">
+            <select name="colors" id="colors">
+                <option value="none" selected disabled hidden>Select a Color Option</option>
+                <option value="default">Monochromatic</option>
+                <option value="service_code">Service Code</option>
+                <option value="updateTime">Update Time</option>
+                <option value="request_into_year">Request Date</option>
+                <option value="agency_responsible">Agency</option>
+            </select>
             <div id="map-colors-div">
                 <svg id="map-colors"></svg>
             </div>
-            <label for="colors">Color By:</label>
-            <select name="colors" id="colors">
-                <option value="default">Monochromatic</option>
-                <option value="service_code">service code</option>
-                <option value="updateTime">update time</option>
-                <option value="request_into_year">request date</option>
-                <option value="agency_responsible">agency</option>
-            </select>
+        </div>
+        <div hidden id="graph-selection">
+            <div>
+                <svg id="requested_datetime_linechart"></svg>
+            </div>
+            <div>
+                <svg id="requested_day_barchart"></svg>
+            </div>
+            <div>
+                <svg id="service_name_barchart"></svg>
+            </div>
+            <div>
+                <svg id="zipcode_barchart"></svg>
+            </div>
+            <div>
+                <svg id="update_time_chart"></svg>
+            </div>
         </div>
     </div>
-    <div>
-        <svg id="requested_datetime_linechart"></svg>
-    </div>
-    <div>
-        <svg id="requested_day_barchart"></svg>
-    </div>
-    <div>
-        <svg id="service_name_barchart"></svg>
-    </div>
-    <div>
-        <svg id="zipcode_barchart"></svg>
-    </div>
-    <div>
-        <svg id="update_time_chart"></svg>
-    </div>
-    
+
+
     <script src="js/d3.v6.min.js"></script>
     <script src="js/leaflet.js"></script>
+    <script src="../js/sideBar.js"></script>
+    <script src="../js/sideBarSelection.js"></script>
 
 
     <script src="js/linechartFocus.js"></script>
@@ -55,4 +72,5 @@
 
 
 </body>
+
 </html>
