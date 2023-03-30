@@ -12,6 +12,7 @@
     <div id="my-map"></div>
     <div id="map-options">
         <div id="button-bar">
+            <button type="button" class="buttons" id="heatmapButton"">Toggle Heatmap</button>
             <button type="button" class="buttons" id="map-background">Map Type Toggle</button>
             <button type="button" class="buttons" id="sidebar-button" onclick="openNav()">&#9776;</button>
         </div>
@@ -57,10 +58,9 @@
 
     <script src="js/d3.v6.min.js"></script>
     <script src="js/leaflet.js"></script>
-    <script src="../js/sideBar.js"></script>
-    <script src="../js/sideBarSelection.js"></script>
-
-
+    <script src="js/sideBar.js"></script>
+    <script src="js/sideBarSelection.js"></script>
+    <script type="module" src="js/generateHeatMap.js"></script>
     <script src="js/linechartFocus.js"></script>
     <script src="js/barchart.js"></script>
     <script src="js/histogram.js"></script>

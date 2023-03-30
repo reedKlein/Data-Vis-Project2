@@ -77,4 +77,8 @@ d3.select('#colors').on('change', d => {
   leafletMap.colorType = color_sel;
   leafletMap.updateLegend();
   leafletMap.updateVis();
-})
+});
+
+d3.select('#heatmapButton').on('click', d => {
+  leafletMap.toggleHeatmap();
+});
