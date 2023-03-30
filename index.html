@@ -38,18 +38,23 @@
         <div hidden id="graph-selection">
             <div>
                 <svg id="requested_datetime_linechart"></svg>
+                <button type="button" class="buttons" id="filter-line">Filter Selection</button>
             </div>
             <div>
                 <svg id="requested_day_barchart"></svg>
+                <button type="button" class="buttons" id="requested_day_logScale">Log Scale</button>
             </div>
             <div>
                 <svg id="service_name_barchart"></svg>
+                <button type="button" class="buttons" id="service_name_logScale">Log Scale</button>
             </div>
             <div>
                 <svg id="zipcode_barchart"></svg>
+                <button type="button" class="buttons" id="zipcode_logScale">Log Scale</button>
             </div>
             <div>
                 <svg id="update_time_chart"></svg>
+                <input type="number" min="1" max="100" step="1" value="20" id="nBins">
             </div>
         </div>
     </div>

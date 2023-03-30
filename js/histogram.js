@@ -1,10 +1,10 @@
 class Histogram{
-    constructor(_config, _data, _type) {
+    constructor(_config, _data, _type, _xAxisLab, _yAxisLab, _title) {
         // Configuration object with defaults
         this.config = {
           parentElement: _config.parentElement,
           logRange: _config.logRange || .5,
-          containerWidth: _config.containerWidth || 320,
+          containerWidth: _config.containerWidth || 500,
           containerHeight: _config.containerHeight || 300,
           margin: _config.margin || {top: 10, right: 15, bottom: 25, left: 40},
           logScale: _config.logScale || false,
@@ -12,6 +12,10 @@ class Histogram{
         }
         this.data = _data;
         this.type = _type;
+        this.xAxisLab = _xAxisLab;
+        this.yAxisLab = _yAxisLab
+        this.title = _title;
+        this.nBins = 20;
         this.initVis();
       }
 
@@ -41,6 +45,24 @@ class Histogram{
         vis.yAxisG = vis.chart.append('g')
             .attr('class', 'axis y-axis');
 
+        vis.chart.append('text')
+        .attr("text-anchor", 'middle')
+        .attr('x', vis.width/2)
+        .attr('y', vis.height + 25)
+        .text(vis.xAxisLab)
+
+        vis.chart.append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('x', -((vis.height + vis.config.margin.top + vis.config.margin.bottom + 50)/2))
+        .attr('y', -30)
+        .text(vis.yAxisLab);
+
+
+        vis.chart.append('text')
+        .attr('x', vis.width / 2)
+        .attr('y', 5)
+        .attr('text-anchor', 'middle')
+        .text(vis.title)
         
     }
 
@@ -51,13 +73,13 @@ class Histogram{
          // X axis: scale and draw:
          vis.xScale = d3.scaleLinear()
          .domain([0, d3.max(data, function(d) { return +d.updateTime })])     //Update tomain in updates
-         .range([0, vis.width]);
+         .range([1, vis.width]);
 
         // set the parameters for the histogram
         vis.histogram = d3.histogram()
         .value(function(d) { return d.updateTime; })   // I need to give the vector of value
         .domain(vis.xScale.domain())  // then the domain of the graphic
-        .thresholds(vis.xScale.ticks(30)); // then the numbers of bins
+        .thresholds(vis.xScale.ticks(vis._boundsCheck(vis.nBins))); // then the numbers of bins
 
         // And apply this function to data to get the bins
         vis.bins = vis.histogram(data);
@@ -76,7 +98,7 @@ class Histogram{
         vis.yScale.range([vis.height, 0]);
 
         vis.xAxis = d3.axisBottom(vis.xScale)
-            .tickFormat(d3.format('.1s'));
+            //.tickFormat(d3.format('.1s'));
         vis.yAxis = d3.axisLeft(vis.yScale);
 
 
@@ -116,9 +138,27 @@ class Histogram{
             .on("mouseleave", () => {
                 d3.select('#tooltip').style('opacity', 0);
               })
+            .on("click", (event, d) => {
+                let data_params = {"d0": d.x0, "d1": d.x1}
+                handle_filter(data_params, vis.type);
+            });
         
         vis.xAxisG.call(vis.xAxis);
         vis.yAxisG.call(vis.yAxis);
 
+    }
+    
+    _boundsCheck(nBins){
+        let vis = this;
+        console.log(vis.xScale.domain())
+        if(nBins <= 1){
+            document.getElementById("nBins").value = 1;
+            return 0;
+        }
+        if(nBins > vis.xScale.domain()[1]){
+            document.getElementById("nBins").value = vis.xScale.domain()[1];
+            return vis.xScale.domain()[1];
+        }
+        return nBins;
     }
 }
