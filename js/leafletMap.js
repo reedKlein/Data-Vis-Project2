@@ -287,12 +287,13 @@ class LeafletMap {
                 serviceHTML += code + ": " + coordinateDict[square.id + "-" + code] + '<br />';
               }
             });
-            //create a tool tip
-            d3.select('#tooltip')
-              .style('opacity', 1)
-              .style('z-index', 1000000)
-              // Format number with million and thousand separator
-              .html(`<div class="tooltip-label">Number of requests: ${this.attributes.value.value}<br />` + serviceHTML + `</div>`);
+            if(square.attributes[3] != 0){
+              //create a tool tip
+              d3.select('#tooltip')
+                .style('opacity', 1)
+                .style('z-index', 1000000)
+                // Format number with million and thousand separator
+                .html(`<div class="tooltip-label">Number of requests: ${this.attributes.value.value}<br />` + serviceHTML + `</div>`);}
           });
           square.addEventListener('mousemove', (event) => {
             //position the tooltip
