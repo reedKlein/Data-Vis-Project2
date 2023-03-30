@@ -121,48 +121,6 @@ d3.select('#nBins').on('input', function(){
   update_time_histogram.updateVis();
 });
 
-d3.select('#requested_day_logScale').on('click', d=> {
-  let ele = d3.select('#requested_day_logScale')
-  if(ele.classed('selected')){ele.classed('selected', false)}
-  else{ele.classed('selected', true)}
-  requested_day_barchart.config.logScale = !requested_day_barchart.config.logScale;
-  requested_day_barchart.updateVis();
-});
-d3.select('#service_name_logScale').on('click', d=> {
-  let ele = d3.select('#service_name_logScale')
-  if(ele.classed('selected')){ele.classed('selected', false)}
-  else{ele.classed('selected', true)}
-  service_name_barchart.config.logScale = !service_name_barchart.config.logScale;
-  service_name_barchart.updateVis();
-});
-d3.select('#zipcode_logScale').on('click', d=> {
-  let ele = d3.select('#zipcode_logScale')
-  if(ele.classed('selected')){ele.classed('selected', false)}
-  else{ele.classed('selected', true)}
-  zipcode_barchart.config.logScale = !zipcode_barchart.config.logScale;
-  zipcode_barchart.updateVis();
-});
-d3.select('#discoverymethod_logScale').on('click', d=> {
-  let ele = d3.select('#discoverymethod_logScale')
-  if(ele.classed('selected')){ele.classed('selected', false)}
-  else{ele.classed('selected', true)}
-  discoverymethod_barchart.config.logScale = !discoverymethod_barchart.config.logScale;
-  discoverymethod_barchart.updateVis();
-});
-d3.select('#habitable_logScale').on('click', d=> {
-  let ele = d3.select('#habitable_logScale')
-  if(ele.classed('selected')){ele.classed('selected', false)}
-  else{ele.classed('selected', true)}
-  habitable_barchart.config.logScale = !habitable_barchart.config.logScale;
-  habitable_barchart.updateVis();
-});
-d3.select('#distance_logScale').on('click', d=> {
-  let ele = d3.select('#distance_logScale')
-  if(ele.classed('selected')){ele.classed('selected', false)}
-  else{ele.classed('selected', true)}
-  distance_histogram.config.logScale = !distance_histogram.config.logScale;
-  distance_histogram.updateVis();
-});
 
 // Clear selection button functionality
 function clearSelect(){
