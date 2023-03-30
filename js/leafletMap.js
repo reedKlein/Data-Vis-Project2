@@ -175,6 +175,29 @@ class LeafletMap {
             .attr('id', String(i) + '-' + String(j));
         }
       }
+      let transformIndex = document.getElementById('my-map').innerHTML.indexOf("translate3d");
+        let transformString = document.getElementById('my-map').innerHTML.substring(transformIndex);
+
+        transformIndex = transformString.indexOf(";");
+        transformString = transformString.substring(0, transformIndex).replace('3d', '').replace(', 0px)', ')').replaceAll('px', '');
+
+        let firstNum = transformString.substring(10, transformString.indexOf(','));
+        if (parseInt(firstNum) > 0) {
+          firstNum = "-" + firstNum
+        }
+        else {
+          firstNum = firstNum.substring(1);
+        }
+
+        let secondNum = transformString.substring(transformString.indexOf(',') + 2, transformString.indexOf(')'));
+        if (parseInt(secondNum) > 0) {
+          secondNum = "-" + secondNum
+        }
+        else {
+          secondNum = secondNum.substring(1);
+        }
+        vis.Grid.attr('transform', 'translate(' + firstNum + ',' + secondNum + ')')
+        vis.updateHeatmap();
       // vis.Grid.attr('opacity', '0')
       vis.theMap.on('moveend', (event) => {
         let transformIndex = document.getElementById('my-map').innerHTML.indexOf("translate3d");
