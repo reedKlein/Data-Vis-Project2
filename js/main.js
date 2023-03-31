@@ -236,20 +236,20 @@ function handle_filter(data, field){
   update_filter_selection(data, field);
   filtered_data = filtering(field);
   update_charts(filtered_data)
-  console.log("data ", data, "\n", "field ", field, "\n", "filters ", selected_filters);
 }
 
 // update selection for multi select
 function update_filter_selection(d, field){ 
-  console.log(selected_filters);
-  if(selected_filters.length == 0){ // Check if filter exists
+  if(selected_filters.length === 0){ // Check if filter exists
       selected_filters.push({"field": field, "d": d});
   }
   else{ // remove filter
       let index = 0
       let newFilter = true;
       selected_filters.forEach( filter =>{
-        if(filter.field == "requested_datetime" || filter.field == "updateTime" || filter.field == "areaSelect"){
+        if((field === "requested_datetime" && filter.field == "requested_datetime") || 
+          (field === "updateTime" && filter.field == "updateTime") || 
+          (field === "areaSelect"  && filter.field == "areaSelect")){
           selected_filters.splice(index,1);
         }
         if(filter.field == field && (filter.d['x'] === d['x'] && d['x'] !== undefined)){
