@@ -116,7 +116,6 @@ d3.select('#filter-line').on('click', d=> {
 });
 
 d3.select('#nBins').on('input', function(){
-  console.log('running')
   update_time_histogram.nBins = +this.value;
   update_time_histogram.updateVis();
 });
@@ -125,11 +124,11 @@ d3.select('#nBins').on('input', function(){
 // Clear selection button functionality
 function clearSelect(){
   selected_filters = [];
-  filtering_event(master_data);
+  update_charts(master_data);
 }
 
 // update table and charts with filtered data
-function filtering_event(filtered_data){
+function update_charts(filtered_data){
   charts.forEach(chart => {
       if(chart.type === "requested_datetime"){
           chart.data = format_barchart_data(filtered_data, chart.type);
@@ -164,7 +163,7 @@ function handle_filter(data, field){
         filtered_data = filtered_data.filter(x => {return new Date(x[filter.field]) >= filter.d['d0'] && new Date(x[filter.field]) < filter.d['d1']});
       }
   });
-  filtering_event(filtered_data)
+  update_charts(filtered_data)
   console.log("data ", data, "\n", "field ", field, "\n", "filters ", selected_filters);
 }
 
@@ -180,7 +179,7 @@ function update_filter_selection(d, field){
         if(filter.field == "requested_datetime" || filter.field == "updateTime"){
           selected_filters.splice(index,1);
         }
-        if(filter.field == field && (filter.d['x'] == d['x'] && d['x'])){
+        if(filter.field == field && (filter.d['x'] === d['x'] && d['x'] !== undefined)){
             selected_filters.splice(index, 1);
             newFilter = false;       
         }
@@ -190,7 +189,6 @@ function update_filter_selection(d, field){
           selected_filters.push({"field": field, "d": d});
       }
   }
-  console.log(selected_filters);
 }
 
 
@@ -198,13 +196,11 @@ function update_filter_selection(d, field){
 /* 
 TODO:
 
-2. ADD FILTERING (bar charts and line graph/histogram)
-2a. 2 options:
-    A) Keep filters the same way and add "brush" to the histogram
-    B) Filter per chart and add a glow effect to selected filters. Keep data mostly in-tact for active filters.
-3. TITLE/AXIS TITLES
-4. FIX Y SCALING TO BE EQUAL
-5. LOG SCALES
-6. FIX HOVER EVENTS (graphs and map)
+
+-Filter per chart and add a glow effect to selected filters. Keep data mostly in-tact for active filters.
+-Add or to filters
+-FIX Y SCALING TO BE EQUAL
+-FIX HOVER EVENTS graphs
+-fix axis/title
 
 */

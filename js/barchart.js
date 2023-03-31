@@ -113,12 +113,18 @@ class Barchart {
       if (vis.config.logScale){
         vis.yScale = d3.scaleLog()
 
-        vis.yScale.domain([vis.config.logRange, d3.max(vis.data, vis.yValue)]);
+        vis.yScale.domain([.5, d3.max(vis.data, vis.yValue)]);
         vis.yScale.range([vis.height, 0]);
         vis.yAxis = d3.axisLeft(vis.yScale)
-            .ticks(2)
+            .ticks(2, formatPower)
             .tickSizeOuter(0)
-            .tickFormat(d3.format("d"));
+        
+        function formatPower(d){
+            const e = Math.log10(d);
+            console.log(e);
+            if (e !== Math.floor(e)) return; // Ignore non-exact power of ten.
+            return `10${(e + "").replace(/./g, c => "⁰¹²³⁴⁵⁶⁷⁸⁹"[c] || "⁻")}`;
+        };
       }
       else{
         vis.yScale = d3.scaleLinear()
