@@ -36,39 +36,75 @@
             </div>
         </div>
         <div hidden id="graph-selection">
-            <div>
-                <button type="button" class="buttons" id="clear-filters">Clear Filters</button>
+            <div style="text-align:center;">
+                <button type="button" class="buttons-graphs" id="clear-filters">Clear Filters</button>
             </div>
-            <div>
-                <svg id="requested_datetime_linechart"></svg>
-                <button type="button" class="buttons" id="filter-line">Filter Selection</button>
-                <button type="button" class="buttons" id="clear-line">Clear Line Selection</button>
-            </div>
-            <div>
-                <svg id="requested_day_barchart"></svg>
-                <button type="button" class="buttons" id="requested_day_logScale">Log Scale</button>
-            </div>
-            <div>
-                <svg id="service_name_barchart"></svg>
-                <button type="button" class="buttons" id="service_name_logScale">Log Scale</button>
-            </div>
-            <div>
-                <svg id="zipcode_barchart"></svg>
-                <button type="button" class="buttons" id="zipcode_logScale">Log Scale</button>
-            </div>
-            <div>
-                <svg id="update_time_chart"></svg>
-                <div id="update_time_chart_options">
-                <button type="button" class="buttons" id="update_time_logScale">Log Scale</button>
-                <input type="number" min="1" max="100" step="1" value="20" id="nBins">
-                <label for="nBins">Bin Count</label>
-                <div id="update_time_chart_filter">
-                    <input type="number" min="0" max="100" step="1" value="0" id="minBin">
-                    <label for="minBin">Minimum Update Time (days)</label>
-                    <input type="number" min="1" max="100" step="1" value="40" id="maxBin">
-                    <label for="maxBin">Maximum Update Time (days)</label>
+            <div class="svg-container">
+                <div class="chartH">
+                    <h1 class="chart-title">Request Dates</h1>
                 </div>
-
+                <svg id="requested_datetime_linechart"></svg>
+                <div class="display-options">
+                    <button type="button" class="buttons-graphs" id="filter-line">Filter Line Graph</button>
+                    <button hidden type="button" class="buttons-graphs" id="clear-line">Clear Line Selection</button>
+                </div>
+            </div>
+            <hr>
+            <div class="svg-container">
+                <div class="chartH">
+                    <h1 class="chart-title">Day Requested</h1>
+                </div>
+                <svg id="requested_day_barchart"></svg>
+                <div class="display-options">
+                    <button type="button" class="buttons-graphs" id="requested_day_logScale">Log Scale</button>
+                </div>
+            </div>
+            <hr>
+            <div class="svg-container">
+                <div class="chartH">
+                    <h1 class="chart-title">Service Requests</h1>
+                </div>
+                <svg id="service_name_barchart"></svg>
+                <div class="display-options">
+                    <button type="button" class="buttons-graphs" id="service_name_logScale">Log Scale</button>
+                </div>
+            </div>
+            <hr>
+            <div class="svg-container">
+                <div class="chartH">
+                    <h1 class="chart-title">Zipcode</h1>
+                    <div>
+                        <a class="chart-moreinfo" href="https://zipdatamaps.com/zipcodes-cincinnati-oh" target="_blank" style="font-size:16px; text-align:center; margin-bottom:4px;">See Zipcodes</a>
+                    </div>
+                </div>
+                <svg id="zipcode_barchart"></svg>
+                <div class="display-options">
+                    <button type="button" class="buttons-graphs" id="zipcode_logScale">Log Scale</button>
+                </div>
+            </div>
+            <hr>
+            <div class="svg-container">
+                <div class="chartH">
+                    <h1 class="chart-title">Days between request and update</h1>
+                    <div id="update_time_chart_filter">
+                        <div style="margin-bottom: 4px;">
+                            <span class="chart-moreinfo">Filter Range</span>
+                        </div>
+                        <input type="number" min="0" max="100" step="1" value="0" id="minBin">
+                        <label for="minBin">Min. (days)</label>
+                        <input type="number" min="1" max="100" step="1" value="40" id="maxBin">
+                        <label for="maxBin">Max. (days)</label>
+                    </div>
+                </div>
+                <svg id="update_time_chart"></svg>
+                <div class="display-options" style="height:100%; width:100%">
+                    <div style="height: 100%; width:50%; float:left;">
+                        <button type="button" class="buttons-graphs" id="update_time_logScale" style="margin-bottom:10px;">Log Scale</button>
+                    </div>
+                    <div style="height: 100%; width:50%; float:right; margin-top:10px;">
+                        <input type="number" min="1" max="100" step="1" value="20" id="nBins">
+                        <label for="nBins">Bin Count</label>
+                    </div>
                 </div>
             </div>
         </div>

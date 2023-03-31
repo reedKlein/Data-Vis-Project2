@@ -221,11 +221,11 @@ class LeafletMap {
     }
     else if (vis.colorType == "updateTime") {
       vis.colors = d3.scaleLinear().domain([0, 30])
-        .range(["green", "red"]);
+        .range(["white", "#E00122"]);
     }
     else if (vis.colorType == "request_into_year") {
       vis.colors = d3.scaleLinear().domain([10, 11])
-        .range(["green", "red"]);
+        .range(["white", "#E00122"]);
     }
   }
 }

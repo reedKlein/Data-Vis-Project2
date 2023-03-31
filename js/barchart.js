@@ -12,7 +12,7 @@ class Barchart {
         logRange: _config.logRange || .5,
         containerWidth: _config.containerWidth || 550,
         containerHeight: _config.containerHeight || 200,
-        margin: _config.margin || {top: 10, right: 10, bottom: 25, left: 50},
+        margin: _config.margin || {top: 10, right: 10, bottom: 50, left: 50},
         logScale: _config.logScale || false,
         tooltipPadding: _config.tooltipPadding || 15
       }
@@ -80,24 +80,17 @@ class Barchart {
       vis.chart.append('text')
         .attr("text-anchor", 'middle')
         .attr('x', vis.width/2)
-        .attr('y', vis.height + 25)
+        .attr('y', vis.height + 45)
         .text(vis.xAxisLab)
         .attr('class', 'x-axis-label');
 
       vis.chart.append('text')
         .attr('transform', 'rotate(-90)')
         .attr('x', -((vis.height + vis.config.margin.top + vis.config.margin.bottom + 50)/2))
-        .attr('y', -32)
+        .attr('y', -40)
         .text(vis.yAxisLab)
         .attr('class', 'y-axis-label');
 
-
-      vis.chart.append('text')
-        .attr('x', vis.width / 2)
-        .attr('y', 5)
-        .attr('text-anchor', 'middle')
-        .text(vis.title)
-        .attr('class', 'chart-title');
     }
   
     /**
@@ -148,7 +141,7 @@ class Barchart {
       let vis = this;
 
       vis.colorScale = (d) => {
-        return "#b7c58d";
+        return "#E00122";
       }
 
       // Format tooltip for barchart types

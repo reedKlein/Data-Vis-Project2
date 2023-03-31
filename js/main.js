@@ -45,7 +45,7 @@ d3.dsv("|", '/data/cincy311_cleaned_partial.tsv')
     charts.push(requested_day_barchart)
 
     service_name_barchart = new Barchart({parentElement: '#service_name_barchart',
-                                                        margin: {top: 10, right: 10, bottom: 35, left: 50}},
+                                                        margin: {top: 10, right: 10, bottom: 50, left: 50}},
                                                         format_barchart_data(data, "service_name"),
                                                         "service_name",
                                                         "Service",
@@ -54,10 +54,10 @@ d3.dsv("|", '/data/cincy311_cleaned_partial.tsv')
     charts.push(service_name_barchart)
 
     zipcode_barchart = new Barchart({parentElement: '#zipcode_barchart',
-                                                        margin: {top: 10, right: 5, bottom: 20, left: 50}},
+                                                        margin: {top: 10, right: 5, bottom: 50, left: 50}},
                                                         format_barchart_data(data, "zipcode"),
                                                         "zipcode",
-                                                        "Zipcode (452 abbreviated w/ ')",
+                                                        "Zipcode (452 abbreviated with ')",
                                                         "Requests",
                                                         "Requests by Zipcode");
     charts.push(zipcode_barchart)
@@ -65,7 +65,7 @@ d3.dsv("|", '/data/cincy311_cleaned_partial.tsv')
     update_time_histogram = new Histogram({ parentElement: '#update_time_chart'}, 
                                     data, 
                                     "updateTime",
-                                    "Days Bins",
+                                    "Day Bins",
                                     "Requests",
                                     "Days between request and update");
     charts.push(update_time_histogram)
@@ -132,12 +132,15 @@ d3.select('#colors').on('change', d => {
 });
 
 d3.select('#clear-filters').on('click', () =>{
+  document.getElementById('clear-line').hidden = true;
   clearSelect();
 })
 
 d3.select('#filter-line').on('click', d=> {
   requested_datetime_linechart.filterLine();
+  document.getElementById('clear-line').hidden = false;
 });
+
 d3.select('#clear-line').on('click', () => {
   let index = 0;
   selected_filters.forEach( filter =>{
@@ -148,6 +151,7 @@ d3.select('#clear-line').on('click', () => {
   });
   let filtered_data = filtering("requested_datetime");
   update_charts(filtered_data);
+  document.getElementById('clear-line').hidden = true;
 })
 
 d3.select('#nBins').on('input', function(){
@@ -248,6 +252,7 @@ function update_filter_selection(d, field){
 /* 
 TODO:
 
--FIX Y SCALING TO BE EQUAL
+-BUTTON LAYOUT / STYLE
+-MAP BRUSHING FROM KHOA?
 
 */
