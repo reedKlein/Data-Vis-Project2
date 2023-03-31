@@ -73,7 +73,8 @@ class LeafletMap {
     vis.theMap.on("zoomend", function(){
       vis.Dots
         .attr("cx", d => vis.theMap.latLngToLayerPoint([d.latitude,d.longitude]).x)
-        .attr("cy", d => vis.theMap.latLngToLayerPoint([d.latitude,d.longitude]).y)
+        .attr("cy", d => vis.theMap.latLngToLayerPoint([d.latitude,d.longitude]).y);
+      vis.updateHeatmap();
     });
 
     vis.theMap.on('areaselected', (e) => {
@@ -112,13 +113,13 @@ class LeafletMap {
             .attr("fill", "red") //change the fill
             .attr('r', vis.radiusSize); //change radius
 
-          //create a tool tip
-          d3.select('#tooltip')
-            .style('opacity', 1)
-            .style('z-index', 1000000)
-            // Format number with million and thousand separator
-            .html(`<div class="tooltip-label">Requested Date ${d.requested_date}, Updated Date: ${(d.updated_date)}
-                                        Agency Responsible: ${(d.agency_responsible)} Description: ${(d.description)}</div>`);
+        //create a tool tip
+        d3.select('#tooltip')
+          .style('opacity', 1)
+          .style('z-index', 1000000)
+          // Format number with million and thousand separator
+          .html(`<div class="tooltip-label">Requested Date ${d.requested_date},<br /> Updated Date: ${(d.updated_date)}<br />
+                                      Agency Responsible: ${(d.agency_responsible)}<br /> Description: ${(d.description)}</div>`);
 
         })
         .on('mousemove', (event) => {
@@ -157,7 +158,6 @@ class LeafletMap {
           vis.Grid.append('rect')
             .attr('width', '20')
             .attr('height', '20')
-            .attr("stroke", "black")
             .attr("fill", "red")
             .attr('opacity', '0')
             .attr('transform', 'translate(' + String(i) + ',' + String(j) + ')')
@@ -165,28 +165,28 @@ class LeafletMap {
         }
       }
       let transformIndex = document.getElementById('my-map').innerHTML.indexOf("translate3d");
-        let transformString = document.getElementById('my-map').innerHTML.substring(transformIndex);
+      let transformString = document.getElementById('my-map').innerHTML.substring(transformIndex);
 
-        transformIndex = transformString.indexOf(";");
-        transformString = transformString.substring(0, transformIndex).replace('3d', '').replace(', 0px)', ')').replaceAll('px', '');
+      transformIndex = transformString.indexOf(";");
+      transformString = transformString.substring(0, transformIndex).replace('3d', '').replace(', 0px)', ')').replaceAll('px', '');
 
-        let firstNum = transformString.substring(10, transformString.indexOf(','));
-        if (parseInt(firstNum) > 0) {
-          firstNum = "-" + firstNum
-        }
-        else {
-          firstNum = firstNum.substring(1);
-        }
+      let firstNum = transformString.substring(10, transformString.indexOf(','));
+      if (parseInt(firstNum) > 0) {
+        firstNum = "-" + firstNum
+      }
+      else {
+        firstNum = firstNum.substring(1);
+      }
 
-        let secondNum = transformString.substring(transformString.indexOf(',') + 2, transformString.indexOf(')'));
-        if (parseInt(secondNum) > 0) {
-          secondNum = "-" + secondNum
-        }
-        else {
-          secondNum = secondNum.substring(1);
-        }
-        vis.Grid.attr('transform', 'translate(' + firstNum + ',' + secondNum + ')')
-        vis.updateHeatmap();
+      let secondNum = transformString.substring(transformString.indexOf(',') + 2, transformString.indexOf(')'));
+      if (parseInt(secondNum) > 0) {
+        secondNum = "-" + secondNum
+      }
+      else {
+        secondNum = secondNum.substring(1);
+      }
+      vis.Grid.attr('transform', 'translate(' + firstNum + ',' + secondNum + ')')
+      vis.updateHeatmap();
       // vis.Grid.attr('opacity', '0')
       vis.theMap.on('moveend', (event) => {
         let transformIndex = document.getElementById('my-map').innerHTML.indexOf("translate3d");
@@ -225,35 +225,79 @@ class LeafletMap {
 
   updateHeatmap() {
     let vis = this;
-    let coordinateDict = {};
-    document.getElementById('grid').childNodes.forEach(function (item) {
-      item.setAttribute('opacity', 0);
-    });
-    vis.Dots._groups[0].forEach(function (item) {
-      // tooltips can be grabbed here
-      let x = Math.floor(item.getBoundingClientRect().left/ 20) * 20;
-      let y = Math.floor(item.getBoundingClientRect().top/ 20) * 20;
-      if (coordinateDict[String(x) + "-" + String(y)] !== undefined) {
-        coordinateDict[String(x) + "-" + String(y)] = coordinateDict[String(x) + "-" + String(y)] + 1;
-      }
-      else {
-        coordinateDict[String(x) + "-" + String(y)] = 1;
-      }
-    });
-    let maxKey, maxValue = 0;
+    vis.serviceCodes = [];
 
-    for (const [key, value] of Object.entries(coordinateDict)) {
-      if (value > maxValue) {
-        maxValue = value;
-        maxKey = key;
-      }
-    }
+    if (vis.isHeatMapOn) {
+      let coordinateDict = {};
+      document.getElementById('grid').childNodes.forEach(function (item) {
+        item.setAttribute('opacity', 0);
+      });
+      vis.Dots._groups[0].forEach(function (item) {
+        // tooltips can be grabbed here
+        let x = Math.floor(item.getBoundingClientRect().left / 20) * 20;
+        let y = Math.floor(item.getBoundingClientRect().top / 20) * 20;
+        if (coordinateDict[String(x) + "-" + String(y)] !== undefined) {
+          coordinateDict[String(x) + "-" + String(y)] += 1;
+          if (coordinateDict[String(x) + "-" + String(y) + "-" + String(item.__data__.service_code)] !== undefined) {
+            coordinateDict[String(x) + "-" + String(y) + "-" + String(item.__data__.service_code)] += 1;
+          }
+          else {
+            coordinateDict[String(x) + "-" + String(y) + "-" + String(item.__data__.service_code)] = 1;
+          }
+        }
+        else {
+          coordinateDict[String(x) + "-" + String(y)] = 1;
+          coordinateDict[String(x) + "-" + String(y) + "-" + String(item.__data__.service_code)] = 1;
+        }
+        if (vis.serviceCodes.includes(item.__data__.service_code) == false) {
+          vis.serviceCodes.push(item.__data__.service_code);
+        }
+      });
+      let maxValue = 0;
 
-    let scale = 1 / maxValue;
-    for (const [key, value] of Object.entries(coordinateDict)) {
-      let square = document.getElementById(key);
-      if(square) {
-        square.setAttribute('opacity', value * scale);
+      for (const [key, value] of Object.entries(coordinateDict)) {
+        if (value > maxValue) {
+          maxValue = value;
+        }
+      }
+
+      let scale = 1 / maxValue;
+      for (const [key, value] of Object.entries(coordinateDict)) {
+        let square = document.getElementById(key);
+        if (square) {
+          square.setAttribute('opacity', value * scale);
+          square.setAttribute('value', value);
+          vis.serviceCodes.forEach(function (code) {
+            if (coordinateDict[key + "-" + code] > 0) {
+              square.setAttribute(code.replace('/', '').replace(',', ''), coordinateDict[key + "-" + code]);
+            }
+          });
+          square.addEventListener('mouseover', function (event) { //function to add mouseover event
+            let serviceHTML = "";
+            vis.serviceCodes.forEach(function (code) {
+              if (coordinateDict[square.id + "-" + code] != undefined) {
+                serviceHTML += code + ": " + coordinateDict[square.id + "-" + code] + '<br />';
+              }
+            });
+            if(square.attributes[3] != 0){
+              //create a tool tip
+              d3.select('#tooltip')
+                .style('opacity', 1)
+                .style('z-index', 1000000)
+                // Format number with million and thousand separator
+                .html(`<div class="tooltip-label">Number of requests: ${this.attributes.value.value}<br />` + serviceHTML + `</div>`);}
+          });
+          square.addEventListener('mousemove', (event) => {
+            //position the tooltip
+            d3.select('#tooltip')
+              .style('left', (event.pageX + 10) + 'px')
+              .style('top', (event.pageY + 10) + 'px');
+          });
+
+          square.addEventListener('mouseleave', function () { //function to add mouseover event
+            d3.select('#tooltip').style('opacity', 0);//turn off the tooltip
+          });
+        }
       }
     }
   }

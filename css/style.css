@@ -1,11 +1,12 @@
-.hexbin-hexagon {
-  stroke: #000;
-  stroke-width: 1px;
-}
-
 body {
   margin: 0px;
   background-color: dimgray;
+}
+
+#grid rect:hover{
+  outline-style: solid;
+  outline-width: 1px;
+  transition: 0.5s;
 }
 
 /* Map background styling */
