@@ -3,7 +3,7 @@ var selected_filters = [];
 var charts = [];
 var master_data = [];
 
-d3.dsv("|", '/data/cincy311_cleaned_partial.tsv')
+d3.dsv("|", '/data/cincy311_cleaned.tsv')
 .then(data => {
     console.log(data[0]);
     console.log(data.length);
@@ -21,14 +21,14 @@ d3.dsv("|", '/data/cincy311_cleaned_partial.tsv')
       d.zipcode = d.zipcode.split(".")[0];
     });
 
-    master_data = data;
+    master_data = data.filter(d => {return d.requested_date >= new Date("2021-01-01") && d.requested_date < new Date("2021-07-01")});
 
     // Initialize chart and then show it
     //colorsOption = new colorsOption({parentElement: '#map-colors'}, format_map_option_data(format_barchart(data, "service_code"), "service_code"));
-    leafletMap = new LeafletMap({ parentElement: '#my-map'}, data);
+    leafletMap = new LeafletMap({ parentElement: '#my-map'}, master_data);
 
     requested_datetime_linechart = new FocusContextVis({parentElement: '#requested_datetime_linechart'}, 
-                                                        format_barchart_data(data, "requested_datetime"), 
+                                                        format_barchart_data(master_data, "requested_datetime"), 
                                                         "requested_datetime",
                                                         "Date",
                                                         "Requests",
@@ -37,7 +37,7 @@ d3.dsv("|", '/data/cincy311_cleaned_partial.tsv')
     charts.push(requested_datetime_linechart)
 
     requested_day_barchart = new Barchart({parentElement: '#requested_day_barchart'},
-                                                        format_barchart_data(data, "requested_day"),
+                                                        format_barchart_data(master_data, "requested_day"),
                                                         "requested_day",
                                                         "Day",
                                                         "Requests",
@@ -46,7 +46,7 @@ d3.dsv("|", '/data/cincy311_cleaned_partial.tsv')
 
     service_name_barchart = new Barchart({parentElement: '#service_name_barchart',
                                                         margin: {top: 10, right: 10, bottom: 50, left: 50}},
-                                                        format_barchart_data(data, "service_name"),
+                                                        format_barchart_data(master_data, "service_name"),
                                                         "service_name",
                                                         "Service",
                                                         "Requests",
@@ -55,7 +55,7 @@ d3.dsv("|", '/data/cincy311_cleaned_partial.tsv')
 
     zipcode_barchart = new Barchart({parentElement: '#zipcode_barchart',
                                                         margin: {top: 10, right: 5, bottom: 50, left: 50}},
-                                                        format_barchart_data(data, "zipcode"),
+                                                        format_barchart_data(master_data, "zipcode"),
                                                         "zipcode",
                                                         "Zipcode (452 abbreviated with ')",
                                                         "Requests",
@@ -63,7 +63,7 @@ d3.dsv("|", '/data/cincy311_cleaned_partial.tsv')
     charts.push(zipcode_barchart)
 
     update_time_histogram = new Histogram({ parentElement: '#update_time_chart'}, 
-                                    data, 
+                                    master_data, 
                                     "updateTime",
                                     "Day Bins",
                                     "Requests",
@@ -164,7 +164,7 @@ d3.select('#clear-map').on('click', () => {
   });
   let filtered_data = filtering("areaSelect");
   update_charts(filtered_data);
-  document.getElementById('clear-line').hidden = true;
+  document.getElementById('clear-map').hidden = true;
 })
 
 d3.select('#nBins').on('input', function(){

@@ -84,6 +84,7 @@ class LeafletMap {
         "d1Lon": areaSelect._southWest.lng,
         "d1Lat": areaSelect._northEast.lat
       }, "areaSelect");
+      document.getElementById('clear-map').hidden = false;
     });
 
 
@@ -351,7 +352,7 @@ class LeafletMap {
         .range(["white", "#E00122"]);
     }
     else if (vis.colorType == "request_into_year") {
-      vis.colors = d3.scaleLinear().domain([10, 11])
+      vis.colors = d3.scaleLinear().domain([0, 6])
         .range(["white", "#E00122"]);
     }
   }
