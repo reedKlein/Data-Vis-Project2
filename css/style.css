@@ -1,3 +1,8 @@
+.hexbin-hexagon {
+  stroke: #000;
+  stroke-width: 1px;
+}
+
 body {
   margin: 0px;
   background-color: dimgray;
@@ -96,7 +101,7 @@ body {
   text-align: center;
 }
 
-#map-background, #sidebar-button {
+#heatmapButton, #map-background, #sidebar-button {
   position: inline-block;
   margin-top: 5px;
   margin-bottom: 8px;
@@ -117,7 +122,7 @@ body {
   transition: 0.3s;
 }
 
-#map-background:hover, #sidebar-button:hover {
+#heatmapButton:hover, #map-background:hover, #sidebar-button:hover {
   background-color: white;
   color: dimgray;
 }

@@ -57,8 +57,17 @@ class LeafletMap {
       zoom: 11.5,
       layers: [vis.base_layer]
     });
-
+  
     //if you stopped here, you would just have a map
+
+    //Brushing
+    vis.theMap.selectArea.enable();
+
+    vis.theMap.on('areaselected', (e) => {
+      console.log(e.bounds.toBBoxString()); // lon, lat, lon, lat
+    });
+
+    
 
     //initialize svg for d3 to add to map
     L.svg({ clickable: true }).addTo(vis.theMap)// we have to make the svg layer clickable
@@ -142,6 +151,119 @@ class LeafletMap {
   }
 
 
+  toggleHeatmap() {
+    let vis = this;
+
+    if (vis.isHeatMapOn == false) {
+      vis.isHeatMapOn = true
+      vis.Grid = vis.svg.append('g').attr('id', 'grid');
+
+      for (let i = 0; i < document.body.clientWidth; i += 20) {
+        for (let j = 0; j < document.body.clientHeight; j += 20) {
+          vis.Grid.append('rect')
+            .attr('width', '20')
+            .attr('height', '20')
+            .attr("stroke", "black")
+            .attr("fill", "red")
+            .attr('opacity', '0')
+            .attr('transform', 'translate(' + String(i) + ',' + String(j) + ')')
+            .attr('id', String(i) + '-' + String(j));
+        }
+      }
+      let transformIndex = document.getElementById('my-map').innerHTML.indexOf("translate3d");
+        let transformString = document.getElementById('my-map').innerHTML.substring(transformIndex);
+
+        transformIndex = transformString.indexOf(";");
+        transformString = transformString.substring(0, transformIndex).replace('3d', '').replace(', 0px)', ')').replaceAll('px', '');
+
+        let firstNum = transformString.substring(10, transformString.indexOf(','));
+        if (parseInt(firstNum) > 0) {
+          firstNum = "-" + firstNum
+        }
+        else {
+          firstNum = firstNum.substring(1);
+        }
+
+        let secondNum = transformString.substring(transformString.indexOf(',') + 2, transformString.indexOf(')'));
+        if (parseInt(secondNum) > 0) {
+          secondNum = "-" + secondNum
+        }
+        else {
+          secondNum = secondNum.substring(1);
+        }
+        vis.Grid.attr('transform', 'translate(' + firstNum + ',' + secondNum + ')')
+        vis.updateHeatmap();
+      // vis.Grid.attr('opacity', '0')
+      vis.theMap.on('moveend', (event) => {
+        let transformIndex = document.getElementById('my-map').innerHTML.indexOf("translate3d");
+        let transformString = document.getElementById('my-map').innerHTML.substring(transformIndex);
+
+        transformIndex = transformString.indexOf(";");
+        transformString = transformString.substring(0, transformIndex).replace('3d', '').replace(', 0px)', ')').replaceAll('px', '');
+
+        let firstNum = transformString.substring(10, transformString.indexOf(','));
+        if (parseInt(firstNum) > 0) {
+          firstNum = "-" + firstNum
+        }
+        else {
+          firstNum = firstNum.substring(1);
+        }
+
+        let secondNum = transformString.substring(transformString.indexOf(',') + 2, transformString.indexOf(')'));
+        if (parseInt(secondNum) > 0) {
+          secondNum = "-" + secondNum
+        }
+        else {
+          secondNum = secondNum.substring(1);
+        }
+        vis.Grid.attr('transform', 'translate(' + firstNum + ',' + secondNum + ')')
+        vis.updateHeatmap();
+      });
+      this.updateHeatmap();
+      return;
+    }
+    else {
+      vis.isHeatMapOn = false;
+      document.getElementById('grid').remove();
+      return;
+    }
+  }
+
+  updateHeatmap() {
+    let vis = this;
+    let coordinateDict = {};
+    document.getElementById('grid').childNodes.forEach(function (item) {
+      item.setAttribute('opacity', 0);
+    });
+    vis.Dots._groups[0].forEach(function (item) {
+      // tooltips can be grabbed here
+      let x = Math.floor(item.getBoundingClientRect().left/ 20) * 20;
+      let y = Math.floor(item.getBoundingClientRect().top/ 20) * 20;
+      if (coordinateDict[String(x) + "-" + String(y)] !== undefined) {
+        coordinateDict[String(x) + "-" + String(y)] = coordinateDict[String(x) + "-" + String(y)] + 1;
+      }
+      else {
+        coordinateDict[String(x) + "-" + String(y)] = 1;
+      }
+    });
+    let maxKey, maxValue = 0;
+
+    for (const [key, value] of Object.entries(coordinateDict)) {
+      if (value > maxValue) {
+        maxValue = value;
+        maxKey = key;
+      }
+    }
+
+    let scale = 1 / maxValue;
+    for (const [key, value] of Object.entries(coordinateDict)) {
+      let square = document.getElementById(key);
+      if(square) {
+        square.setAttribute('opacity', value * scale);
+      }
+    }
+  }
+
   renderVis() {
     let vis = this;
 
@@ -203,20 +325,20 @@ class LeafletMap {
     vis._setDataColor();
 
     vis.legend_chart.selectAll(".firstrow")
-        .data(vis.legend_colordata)
-          .join("circle")
-        .attr("cy", function(d,i){return 30 + i*50})
-        .attr("cx", 50)
-        .attr("r", 10)
-        .attr("fill", function(d){return vis.colors(d) })
+      .data(vis.legend_colordata)
+      .join("circle")
+      .attr("cy", function (d, i) { return 30 + i * 50 })
+      .attr("cx", 50)
+      .attr("r", 10)
+      .attr("fill", function (d) { return vis.colors(d) })
     vis.legend_chart.selectAll("labels")
       .data(vis.legend_colordata)
-        .join("text")
-      .attr("y", function(d,i){return 36.5 + i*50})
-      .style("fill", function(d){return vis.colors(d)})
+      .join("text")
+      .attr("y", function (d, i) { return 36.5 + i * 50 })
+      .style("fill", function (d) { return vis.colors(d) })
       .attr("x", 68)
       .style("font-size", "18px")
-      .text(function(d){return d})
+      .text(function (d) { return d })
   }
 
   _setDataColor(data) {
