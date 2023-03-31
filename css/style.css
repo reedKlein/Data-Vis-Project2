@@ -85,7 +85,7 @@ body {
   transition: 0.3s;
 }
 
-##color-button, #graph-button {
+#color-button, #graph-button {
   display: absolute;
 }
 
@@ -159,4 +159,17 @@ body {
   stroke: #345454;
   stroke-width: 2px;
   clip-path: url(#clip);
+}
+
+/*For Brushing*/
+.info .result {
+  display: block;
+  margin-top: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  min-width: 130px;
+  position: relative;
+  background: #dddddd;
+  font-family: Monaco, Courier, monospace;
+  padding: 5px;
 }

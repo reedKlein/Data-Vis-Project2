@@ -55,8 +55,17 @@ class LeafletMap {
       zoom: 11.5,
       layers: [vis.base_layer]
     });
-
+  
     //if you stopped here, you would just have a map
+
+    //Brushing
+    vis.theMap.selectArea.enable();
+
+    vis.theMap.on('areaselected', (e) => {
+      console.log(e.bounds.toBBoxString()); // lon, lat, lon, lat
+    });
+
+    
 
     //initialize svg for d3 to add to map
     L.svg({ clickable: true }).addTo(vis.theMap)// we have to make the svg layer clickable
@@ -123,6 +132,20 @@ class LeafletMap {
       }
     });
 
+    vis.theMap.on({
+      'areaselected': (evt) => {
+        L.Util.requestAnimFrame(() => {
+          vis.Dots.eachLayer((pointLayer) => {
+            if (pointLayer instanceof L.CircleMarker) {
+              pointLayer.setStyle({
+                color: evt.bounds.contains(pointLayer.getLatLng()) ? '#0f0' : '#f00'
+              });
+            }
+          });
+        });
+      },
+    })
+
   }
 
   updateVis() {
@@ -133,6 +156,7 @@ class LeafletMap {
 
     //want to control the size of the radius to be a certain number of meters? 
     vis.radiusSize = 3;
+    
 
     // if( vis.theMap.getZoom > 15 ){
     //   metresPerPixel = 40075016.686 * Math.abs(Math.cos(map.getCenter().lat * Math.PI/180)) / Math.pow(2, map.getZoom()+8);
@@ -155,6 +179,7 @@ class LeafletMap {
         d3.select('#tooltip').style('opacity', 0);//turn off the tooltip
       })
   }
+
 
   toggleHeatmap() {
     let vis = this;
