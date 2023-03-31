@@ -154,6 +154,19 @@ d3.select('#clear-line').on('click', () => {
   document.getElementById('clear-line').hidden = true;
 })
 
+d3.select('#clear-map').on('click', () => {
+  let index = 0;
+  selected_filters.forEach( filter =>{
+    if(filter.field == "areaSelect"){
+      selected_filters.splice(index,1);
+    }
+    index++;
+  });
+  let filtered_data = filtering("areaSelect");
+  update_charts(filtered_data);
+  document.getElementById('clear-line').hidden = true;
+})
+
 d3.select('#nBins').on('input', function(){
   update_time_histogram.nBins = +this.value;
   update_time_histogram.updateVis();
@@ -228,6 +241,7 @@ function handle_filter(data, field){
 
 // update selection for multi select
 function update_filter_selection(d, field){ 
+  console.log(selected_filters);
   if(selected_filters.length == 0){ // Check if filter exists
       selected_filters.push({"field": field, "d": d});
   }

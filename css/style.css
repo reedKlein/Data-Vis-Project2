@@ -101,7 +101,7 @@ body {
   text-align: center;
 }
 
-#heatmapButton, #map-background, #sidebar-button {
+#heatmapButton, #map-background, #sidebar-button, #clear-map {
   position: inline-block;
   margin-top: 5px;
   margin-bottom: 8px;
