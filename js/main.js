@@ -11,7 +11,7 @@ d3.dsv("|", '/data/cincy311_cleaned_partial.tsv')
       d.longitude = +d.longitude; //make sure these are not strings
       d.latitude = +d.latitude; //make sure these are not strings
       d.requested_datetime = new Date(d.requested_datetime).toDateString();
-      d.requested_day = new Date(d.requested_date).getDay();
+      d.requested_day = get_requested_day(new Date(d.requested_date).getDay());
       d.service_code = d.service_code.replace(/["]+/g, "");
       d.service_name = d.service_name.replace(/["]+/g, "");
       d.updated_date = new Date(d.updated_date);
@@ -45,7 +45,7 @@ d3.dsv("|", '/data/cincy311_cleaned_partial.tsv')
     charts.push(requested_day_barchart)
 
     service_name_barchart = new Barchart({parentElement: '#service_name_barchart',
-                                                        margin: {top: 10, right: 10, bottom: 35, left: 40}},
+                                                        margin: {top: 10, right: 10, bottom: 35, left: 50}},
                                                         format_barchart_data(data, "service_name"),
                                                         "service_name",
                                                         "Service",
@@ -54,7 +54,7 @@ d3.dsv("|", '/data/cincy311_cleaned_partial.tsv')
     charts.push(service_name_barchart)
 
     zipcode_barchart = new Barchart({parentElement: '#zipcode_barchart',
-                                                        margin: {top: 10, right: 5, bottom: 20, left: 40}},
+                                                        margin: {top: 10, right: 5, bottom: 20, left: 50}},
                                                         format_barchart_data(data, "zipcode"),
                                                         "zipcode",
                                                         "Zipcode (452 abbreviated w/ ')",
@@ -95,6 +95,26 @@ function format_barchart_data(data, field){
   return retData
 }
 
+function get_requested_day(day){
+  switch(day){
+    case 0:
+      return "Sun."
+    case 1:
+      return "Mon."
+    case 2:
+      return "Tues."
+    case 3:
+      return "Wed."
+    case 4:
+      return "Thur."
+    case 5:
+      return "Fri."
+    case 6:
+      return "Sat."
+  }
+  return "undef."
+}
+
 
 // Event Listeners 
 
@@ -111,13 +131,40 @@ d3.select('#colors').on('change', d => {
   leafletMap.updateVis();
 });
 
+d3.select('#clear-filters').on('click', () =>{
+  clearSelect();
+})
+
 d3.select('#filter-line').on('click', d=> {
   requested_datetime_linechart.filterLine();
 });
+d3.select('#clear-line').on('click', () => {
+  let index = 0;
+  selected_filters.forEach( filter =>{
+    if(filter.field == "requested_datetime"){
+      selected_filters.splice(index,1);
+    }
+    index++;
+  });
+  let filtered_data = filtering("requested_datetime");
+  update_charts(filtered_data);
+})
 
 d3.select('#nBins').on('input', function(){
   update_time_histogram.nBins = +this.value;
   update_time_histogram.updateVis();
+});
+
+d3.select('#minBin').on('input', function(){
+  maxBin = document.getElementById('maxBin').value;
+  if(this.value < 0){this.value = 0}
+  handle_filter({"d0": Math.min(this.value, maxBin), "d1": Math.max(this.value, maxBin)}, "updateTime")
+});
+
+d3.select('#maxBin').on('input', function(){
+  minBin = document.getElementById('minBin').value;
+  if(this.value < 0){this.value = 0}
+  handle_filter({"d0": Math.min(this.value, minBin), "d1": Math.max(this.value, minBin)}, "updateTime")
 });
 
 
@@ -148,9 +195,7 @@ function update_charts(filtered_data){
   leafletMap.updateVis();
 }
 
-// handle filter event
-function handle_filter(data, field){
-  update_filter_selection(data, field);
+function filtering(field){
   filtered_data = master_data;
   selected_filters.forEach( filter => {
       if(filter.field === "requested_day" || filter.field === "service_name" || filter.field === "zipcode"){
@@ -163,6 +208,13 @@ function handle_filter(data, field){
         filtered_data = filtered_data.filter(x => {return new Date(x[filter.field]) >= filter.d['d0'] && new Date(x[filter.field]) < filter.d['d1']});
       }
   });
+  return filtered_data;
+}
+
+// handle filter event
+function handle_filter(data, field){
+  update_filter_selection(data, field);
+  filtered_data = filtering(field);
   update_charts(filtered_data)
   console.log("data ", data, "\n", "field ", field, "\n", "filters ", selected_filters);
 }
@@ -196,11 +248,6 @@ function update_filter_selection(d, field){
 /* 
 TODO:
 
-
--Filter per chart and add a glow effect to selected filters. Keep data mostly in-tact for active filters.
--Add or to filters
 -FIX Y SCALING TO BE EQUAL
--FIX HOVER EVENTS graphs
--fix axis/title
 
 */

@@ -12,7 +12,7 @@ class Barchart {
         logRange: _config.logRange || .5,
         containerWidth: _config.containerWidth || 550,
         containerHeight: _config.containerHeight || 200,
-        margin: _config.margin || {top: 10, right: 10, bottom: 25, left: 45},
+        margin: _config.margin || {top: 10, right: 10, bottom: 25, left: 50},
         logScale: _config.logScale || false,
         tooltipPadding: _config.tooltipPadding || 15
       }
@@ -82,12 +82,14 @@ class Barchart {
         .attr('x', vis.width/2)
         .attr('y', vis.height + 25)
         .text(vis.xAxisLab)
+        .attr('class', 'x-axis-label');
 
       vis.chart.append('text')
         .attr('transform', 'rotate(-90)')
         .attr('x', -((vis.height + vis.config.margin.top + vis.config.margin.bottom + 50)/2))
-        .attr('y', -30)
-        .text(vis.yAxisLab);
+        .attr('y', -32)
+        .text(vis.yAxisLab)
+        .attr('class', 'y-axis-label');
 
 
       vis.chart.append('text')
@@ -95,6 +97,7 @@ class Barchart {
         .attr('y', 5)
         .attr('text-anchor', 'middle')
         .text(vis.title)
+        .attr('class', 'chart-title');
     }
   
     /**
@@ -121,7 +124,6 @@ class Barchart {
         
         function formatPower(d){
             const e = Math.log10(d);
-            console.log(e);
             if (e !== Math.floor(e)) return; // Ignore non-exact power of ten.
             return `10${(e + "").replace(/./g, c => "⁰¹²³⁴⁵⁶⁷⁸⁹"[c] || "⁻")}`;
         };
@@ -152,16 +154,12 @@ class Barchart {
       // Format tooltip for barchart types
       vis.tooltipSelect = (type, d) => {
         switch(type){
-          case "sy_snum":
-            return `<div class="tooltip-label">${d.x} star(s)</div>${d3.format(',')(d.y)} planet(s)`;
-          case "sy_pnum":
-            return `<div class="tooltip-label">${d.x} planet(s)</div>${d3.format(',')(d.y)} system(s)`;
-          case "st_spectype":
-            return `<div class="tooltip-label">star type: ${d.x}</div>${d3.format(',')(d.y)} planet(s)`;
-          case "discoverymethod":
-            return `<div class="tooltip-label">method: ${d.x}</div>${d3.format(',')(d.y)} planet(s)`;
-          case "habitability":
-            return `<div class="tooltip-label">status: ${d.x}</div>${d3.format(',')(d.y)} planet(s)`;
+          case "requested_day":
+            return `<div class="tooltip-label">day: ${d.x}</div>${d3.format(',')(d.y)} request(s)`;
+          case "service_name":
+            return `<div class="tooltip-label">${d.x}</div>${d3.format(',')(d.y)} request(s)`;
+          case "zipcode":
+            return `<div class="tooltip-label">zipcode: ${d.x}</div>${d3.format(',')(d.y)} request(s)`;
         }
         return `<div class="tooltip-label">${type}<br>${d.x}</div>${d3.format(',')(d.y)}`;
       }
@@ -200,7 +198,19 @@ class Barchart {
             d3.select('#tooltip').style('opacity', 0);
           })
           .on('click', (event, d) =>{
-            handle_filter(d, vis.type);
+            if(vis.type === "service_name" && d['x'] === "other"){
+                let fields = vis.xScale.domain()
+                let temp = master_data;
+                fields.forEach( f => {
+                    temp = temp.filter(x => {return x["service_name"] !== f})
+                });
+
+                vis.data = format_barchart_data(temp, "service_name");
+                vis.updateVis();
+            }
+            else{
+                handle_filter(d, vis.type);
+            }
           });
       
   
@@ -219,6 +229,7 @@ class Barchart {
       vis.yAxisG.call(vis.yAxis);
     }
   }
+  
 
   d3.select('#requested_day_logScale').on('click', d=> {
     let ele = d3.select('#requested_day_logScale')

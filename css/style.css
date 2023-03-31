@@ -155,3 +155,22 @@ body {
   stroke-width: 2px;
   clip-path: url(#clip);
 }
+
+.chart-title{
+  font-size: 20px;
+  fill: white;
+}
+
+.y-axis-label{
+  font-size: 15px;
+  fill: white;
+}
+
+.x-axis-label{
+  font-size: 15px;
+  fill: white;
+}
+
+label {
+  color:white;
+}

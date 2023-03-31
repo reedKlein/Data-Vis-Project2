@@ -6,7 +6,7 @@ class Histogram{
           logRange: _config.logRange || .5,
           containerWidth: _config.containerWidth || 500,
           containerHeight: _config.containerHeight || 300,
-          margin: _config.margin || {top: 10, right: 15, bottom: 25, left: 40},
+          margin: _config.margin || {top: 10, right: 15, bottom: 25, left: 50},
           logScale: _config.logScale || false,
           tooltipPadding: _config.tooltipPadding || 15
         }
@@ -50,19 +50,22 @@ class Histogram{
         .attr('x', vis.width/2)
         .attr('y', vis.height + 25)
         .text(vis.xAxisLab)
+        .attr('class', 'x-axis-label');
 
         vis.chart.append('text')
         .attr('transform', 'rotate(-90)')
         .attr('x', -((vis.height + vis.config.margin.top + vis.config.margin.bottom + 50)/2))
-        .attr('y', -30)
-        .text(vis.yAxisLab);
+        .attr('y', -32)
+        .text(vis.yAxisLab)
+        .attr('class', 'y-axis-label');
 
 
         vis.chart.append('text')
         .attr('x', vis.width / 2)
-        .attr('y', 5)
+        .attr('y', 0)
         .attr('text-anchor', 'middle')
         .text(vis.title)
+        .attr('class', 'chart-title');
         
     }
 
@@ -88,20 +91,26 @@ class Histogram{
         if(vis.config.logScale){
             vis.yScale = d3.scaleLog()
             .domain([vis.config.logRange, d3.max(vis.bins, function(d) { return d.length; })]);   // d3.hist has to be called before the Y axis obviously
+            vis.yScale.range([vis.height, 0]);
+            vis.xAxis = d3.axisBottom(vis.xScale)
+            vis.yAxis = d3.axisLeft(vis.yScale)
+                .ticks(2, formatPower);
 
+            function formatPower(d){
+                const e = Math.log10(d);
+                if (e !== Math.floor(e)) return; // Ignore non-exact power of ten.
+                return `10${(e + "").replace(/./g, c => "⁰¹²³⁴⁵⁶⁷⁸⁹"[c] || "⁻")}`;
+            };
         }
         else{
             vis.yScale = d3.scaleLinear()
             .domain([0, d3.max(vis.bins, function(d) { return d.length; })]);   // d3.hist has to be called before the Y axis obviously
+            vis.yScale.range([vis.height, 0]);
+
+            vis.xAxis = d3.axisBottom(vis.xScale)
+                //.tickFormat(d3.format('.1s'));
+            vis.yAxis = d3.axisLeft(vis.yScale);
         }
-
-        vis.yScale.range([vis.height, 0]);
-
-        vis.xAxis = d3.axisBottom(vis.xScale)
-            //.tickFormat(d3.format('.1s'));
-        vis.yAxis = d3.axisLeft(vis.yScale);
-
-
 
         this.renderVis();
     }
@@ -138,10 +147,6 @@ class Histogram{
             .on("mouseleave", () => {
                 d3.select('#tooltip').style('opacity', 0);
               })
-            .on("click", (event, d) => {
-                let data_params = {"d0": d.x0, "d1": d.x1}
-                handle_filter(data_params, vis.type);
-            });
         
         vis.xAxisG.call(vis.xAxis);
         vis.yAxisG.call(vis.yAxis);
@@ -150,7 +155,6 @@ class Histogram{
     
     _boundsCheck(nBins){
         let vis = this;
-        console.log(vis.xScale.domain())
         if(nBins <= 1){
             document.getElementById("nBins").value = 1;
             return 0;
@@ -162,3 +166,11 @@ class Histogram{
         return nBins;
     }
 }
+
+d3.select('#update_time_logScale').on('click', d=> {
+    let ele = d3.select('#update_time_logScale')
+    if(ele.classed('selected')){ele.classed('selected', false)}
+    else{ele.classed('selected', true)}
+    update_time_histogram.config.logScale = !update_time_histogram.config.logScale;
+    update_time_histogram.updateVis();
+  });

@@ -11,8 +11,8 @@ class FocusContextVis {
         width:  500,
         height: 200,
         contextHeight: 50,
-        margin: {top: 30, right: 15, bottom: 135, left: 45},
-        contextMargin: {top: 250, right: 0, bottom: 20, left: 25}
+        margin: {top: 30, right: 15, bottom: 135, left: 50},
+        contextMargin: {top: 250, right: 0, bottom: 20, left: 45}
       }
       _data.forEach( d => {
         d.x = new Date(d.x)
@@ -130,18 +130,21 @@ class FocusContextVis {
         .attr('x', containerWidth/2)
         .attr('y', 80)
         .text(vis.xAxisLab)
+        .attr('class', 'x-axis-label');
 
         vis.focus.append('text')
         .attr('transform', 'rotate(-90)')
         .attr('x', -(containerHeight/2))
-        .attr('y', -30)
-        .text(vis.yAxisLab);
+        .attr('y', -32)
+        .text(vis.yAxisLab)
+        .attr('class', 'y-axis-label');
 
         vis.focus.append('text')
         .attr('x', containerWidth / 2)
         .attr('y', 5)
         .attr('text-anchor', 'middle')
         .text(vis.title)
+        .attr('class', 'chart-title');
     }
   
     /**
