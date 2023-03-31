@@ -156,6 +156,13 @@ class Barchart {
         }
         return `<div class="tooltip-label">${type}<br>${d.x}</div>${d3.format(',')(d.y)}`;
       }
+
+      vis.class = (field, d) => {
+        if(selected_filters.find(e => e.field === field && e.d.x === d.x)){
+            return "bar selected-bar"
+        }
+        return 'bar'
+      }
   
       // Add rectangles
       vis.bars = vis.chart.selectAll('.bar')
@@ -166,7 +173,7 @@ class Barchart {
         .transition().duration(1000)
           .style('opacity', 1)
           .style('fill', vis.colorScale(vis.type))
-          .attr('class', 'bar')
+          .attr('class', d => vis.class(vis.type, d))
           .attr('x', d => vis.xScale(vis.xValue(d)))
           .attr('width', vis.xScale.bandwidth())
           .attr('height', d => vis.height - vis.yScale(vis.yValue(d)))

@@ -52,6 +52,7 @@ class LeafletMap {
     });
 
     vis.theMap = L.map('my-map', {
+      selectArea: true,
       center: [39.15, -84.5],
       zoom: 11.5,
       layers: [vis.base_layer]
@@ -70,6 +71,17 @@ class LeafletMap {
       vis.Dots
         .attr("cx", d => vis.theMap.latLngToLayerPoint([d.latitude,d.longitude]).x)
         .attr("cy", d => vis.theMap.latLngToLayerPoint([d.latitude,d.longitude]).y)
+    });
+
+    vis.theMap.on('areaselected', (e) => {
+      console.log(e.bounds); // lon, lat, lon, lat
+      let areaSelect = e.bounds;
+      handle_filter({
+        "d0Lon": areaSelect._northEast.lng,
+        "d0Lat": areaSelect._southWest.lat,
+        "d1Lon": areaSelect._southWest.lng,
+        "d1Lat": areaSelect._northEast.lat
+      }, "areaSelect");
     });
 
 

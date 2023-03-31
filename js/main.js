@@ -211,6 +211,9 @@ function filtering(field){
       else if(filter.field == 'requested_datetime'){
         filtered_data = filtered_data.filter(x => {return new Date(x[filter.field]) >= filter.d['d0'] && new Date(x[filter.field]) < filter.d['d1']});
       }
+      else if(filter.field === "areaSelect"){
+        filtered_data = filtered_data.filter(x => {return x['longitude'] < filter.d['d0Lon'] && x['longitude'] > filter.d['d1Lon'] && x['latitude'] > filter.d['d0Lat'] && x['latitude'] < filter.d['d1Lat']})
+      }
   });
   return filtered_data;
 }
@@ -232,7 +235,7 @@ function update_filter_selection(d, field){
       let index = 0
       let newFilter = true;
       selected_filters.forEach( filter =>{
-        if(filter.field == "requested_datetime" || filter.field == "updateTime"){
+        if(filter.field == "requested_datetime" || filter.field == "updateTime" || filter.field == "areaSelect"){
           selected_filters.splice(index,1);
         }
         if(filter.field == field && (filter.d['x'] === d['x'] && d['x'] !== undefined)){

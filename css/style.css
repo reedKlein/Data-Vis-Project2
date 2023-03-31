@@ -231,3 +231,7 @@ hr{
 #clear-filters{
   font-size: 22px;
 }
+
+.selected-bar{
+  fill:black !important;
+}
