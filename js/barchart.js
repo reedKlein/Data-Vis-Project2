@@ -200,7 +200,7 @@ class Barchart {
           .on('click', (event, d) =>{
             if(vis.type === "service_name" && d['x'] === "other"){
                 let fields = vis.xScale.domain()
-                let temp = master_data;
+                let temp = filtering();
                 fields.forEach( f => {
                     temp = temp.filter(x => {return x["service_name"] !== f})
                 });

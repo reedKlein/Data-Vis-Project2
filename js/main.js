@@ -148,7 +148,7 @@ d3.select('#clear-line').on('click', () => {
     }
     index++;
   });
-  let filtered_data = filtering("requested_datetime");
+  let filtered_data = filtering();
   update_charts(filtered_data);
   document.getElementById('clear-line').hidden = true;
 })
@@ -161,7 +161,7 @@ d3.select('#clear-map').on('click', () => {
     }
     index++;
   });
-  let filtered_data = filtering("areaSelect");
+  let filtered_data = filtering();
   update_charts(filtered_data);
   document.getElementById('clear-map').hidden = true;
 })
@@ -212,7 +212,7 @@ function update_charts(filtered_data){
   leafletMap.updateHeatmap();
 }
 
-function filtering(field){
+function filtering(){
   filtered_data = master_data;
   selected_filters.forEach( filter => {
       if(filter.field === "requested_day" || filter.field === "service_name" || filter.field === "zipcode"){
@@ -234,7 +234,7 @@ function filtering(field){
 // handle filter event
 function handle_filter(data, field){
   update_filter_selection(data, field);
-  filtered_data = filtering(field);
+  filtered_data = filtering();
   update_charts(filtered_data)
 }
 
