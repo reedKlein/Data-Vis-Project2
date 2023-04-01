@@ -5,19 +5,22 @@ class Barchart {
      * @param {Object}
      * @param {Array}
      */
-    constructor(_config, _data, _type) {
+    constructor(_config, _data, _type, _xAxisLab, _yAxisLab, _title) {
       // Configuration object with defaults
       this.config = {
         parentElement: _config.parentElement,
         logRange: _config.logRange || .5,
-        containerWidth: _config.containerWidth || 300,
+        containerWidth: _config.containerWidth || 550,
         containerHeight: _config.containerHeight || 200,
-        margin: _config.margin || {top: 10, right: 10, bottom: 25, left: 40},
+        margin: _config.margin || {top: 10, right: 10, bottom: 50, left: 50},
         logScale: _config.logScale || false,
         tooltipPadding: _config.tooltipPadding || 15
       }
       this.data = _data;
       this.type = _type;
+      this.xAxisLab = _xAxisLab;
+      this.yAxisLab = _yAxisLab
+      this.title = _title;
       this.initVis();
     }
     
@@ -35,12 +38,25 @@ class Barchart {
       // Initialize scales and axes
       // Important: we flip array elements in the y output range to position the rectangles correctly  
       vis.xScale = d3.scaleBand()
-          .range([0, vis.width])
+          .range([1, vis.width])
           .paddingInner(0.2);
-  
-      vis.xAxis = d3.axisBottom(vis.xScale)
+      
+        vis.xAxis = d3.axisBottom(vis.xScale)
           .tickSize(0, 0)
           .ticks(0);
+  
+        if(vis.type === "service_name"){
+            vis.xAxis.tickFormat(function(string){
+                return string.split(/[ ,]+/)[0];
+            });
+        }
+        if(vis.type === "zipcode"){
+            vis.xAxis.tickFormat(function(string){
+                return '\'' + string.substr(string.length - 2);
+            });
+        }
+
+        
   
       // Define size of SVG drawing area
       vis.svg = d3.select(vis.config.parentElement)
@@ -60,7 +76,21 @@ class Barchart {
       vis.yAxisG = vis.chart.append('g')
           .attr('class', 'axis y-axis');
       
-      
+
+      vis.chart.append('text')
+        .attr("text-anchor", 'middle')
+        .attr('x', vis.width/2)
+        .attr('y', vis.height + 45)
+        .text(vis.xAxisLab)
+        .attr('class', 'x-axis-label');
+
+      vis.chart.append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('x', -((vis.height + vis.config.margin.top + vis.config.margin.bottom + 50)/2))
+        .attr('y', -40)
+        .text(vis.yAxisLab)
+        .attr('class', 'y-axis-label');
+
     }
   
     /**
@@ -79,19 +109,27 @@ class Barchart {
       if (vis.config.logScale){
         vis.yScale = d3.scaleLog()
 
-        vis.yScale.domain([vis.config.logRange, d3.max(vis.data, vis.yValue)]);
+        vis.yScale.domain([.5, d3.max(vis.data, vis.yValue)]);
+        vis.yScale.range([vis.height, 0]);
+        vis.yAxis = d3.axisLeft(vis.yScale)
+            .ticks(2, formatPower)
+            .tickSizeOuter(0)
+        
+        function formatPower(d){
+            const e = Math.log10(d);
+            if (e !== Math.floor(e)) return; // Ignore non-exact power of ten.
+            return `10${(e + "").replace(/./g, c => "⁰¹²³⁴⁵⁶⁷⁸⁹"[c] || "⁻")}`;
+        };
       }
       else{
         vis.yScale = d3.scaleLinear()
         
         vis.yScale.domain([0, d3.max(vis.data, vis.yValue)]);
+        vis.yScale.range([vis.height, 0]);
+        vis.yAxis = d3.axisLeft(vis.yScale)
+            .ticks(6)
+            .tickSizeOuter(0)
       }
-
-      vis.yScale.range([vis.height, 0]);
-
-      vis.yAxis = d3.axisLeft(vis.yScale)
-        .ticks(6)
-        .tickSizeOuter(0);
 
       vis.renderVis();
     }
@@ -103,24 +141,27 @@ class Barchart {
       let vis = this;
 
       vis.colorScale = (d) => {
-        return "#b7c58d";
+        return "#E00122";
       }
 
       // Format tooltip for barchart types
       vis.tooltipSelect = (type, d) => {
         switch(type){
-          case "sy_snum":
-            return `<div class="tooltip-label">${d.x} star(s)</div>${d3.format(',')(d.y)} planet(s)`;
-          case "sy_pnum":
-            return `<div class="tooltip-label">${d.x} planet(s)</div>${d3.format(',')(d.y)} system(s)`;
-          case "st_spectype":
-            return `<div class="tooltip-label">star type: ${d.x}</div>${d3.format(',')(d.y)} planet(s)`;
-          case "discoverymethod":
-            return `<div class="tooltip-label">method: ${d.x}</div>${d3.format(',')(d.y)} planet(s)`;
-          case "habitability":
-            return `<div class="tooltip-label">status: ${d.x}</div>${d3.format(',')(d.y)} planet(s)`;
+          case "requested_day":
+            return `<div class="tooltip-label">day: ${d.x}</div>${d3.format(',')(d.y)} request(s)`;
+          case "service_name":
+            return `<div class="tooltip-label">${d.x}</div>${d3.format(',')(d.y)} request(s)`;
+          case "zipcode":
+            return `<div class="tooltip-label">zipcode: ${d.x}</div>${d3.format(',')(d.y)} request(s)`;
         }
         return `<div class="tooltip-label">${type}<br>${d.x}</div>${d3.format(',')(d.y)}`;
+      }
+
+      vis.class = (field, d) => {
+        if(selected_filters.find(e => e.field === field && e.d.x === d.x)){
+            return "bar selected-bar"
+        }
+        return 'bar'
       }
   
       // Add rectangles
@@ -132,7 +173,7 @@ class Barchart {
         .transition().duration(1000)
           .style('opacity', 1)
           .style('fill', vis.colorScale(vis.type))
-          .attr('class', 'bar')
+          .attr('class', d => vis.class(vis.type, d))
           .attr('x', d => vis.xScale(vis.xValue(d)))
           .attr('width', vis.xScale.bandwidth())
           .attr('height', d => vis.height - vis.yScale(vis.yValue(d)))
@@ -151,12 +192,25 @@ class Barchart {
             d3.select('#tooltip')
               .style('left', (event.pageX + vis.config.tooltipPadding) + 'px')   
               .style('top', (event.pageY + vis.config.tooltipPadding) + 'px')
+              .style('z-index', 100)
           })
           .on('mouseleave', () => {
             d3.select('#tooltip').style('opacity', 0);
           })
           .on('click', (event, d) =>{
-            handle_filter(d, vis.type);
+            if(vis.type === "service_name" && d['x'] === "other"){
+                let fields = vis.xScale.domain()
+                let temp = master_data;
+                fields.forEach( f => {
+                    temp = temp.filter(x => {return x["service_name"] !== f})
+                });
+
+                vis.data = format_barchart_data(temp, "service_name");
+                vis.updateVis();
+            }
+            else{
+                handle_filter(d, vis.type);
+            }
           });
       
   
@@ -165,15 +219,39 @@ class Barchart {
           .transition().duration(1000)
           .call(vis.xAxis)
 
-      if(this.type == "discoverymethod"){
+      if(this.type === "service_name" || this.type === "zipcode"){
         vis.xAxisG
             .selectAll("text")
             .style("text-anchor", "end")
-            .attr("transform", "translate(-5,0)rotate(-35)")
+            .attr("transform", "translate(-2,0)rotate(-35)")
       }
   
       vis.yAxisG.call(vis.yAxis);
     }
   }
+  
+
+  d3.select('#requested_day_logScale').on('click', d=> {
+    let ele = d3.select('#requested_day_logScale')
+    if(ele.classed('selected')){ele.classed('selected', false)}
+    else{ele.classed('selected', true)}
+    requested_day_barchart.config.logScale = !requested_day_barchart.config.logScale;
+    requested_day_barchart.updateVis();
+  });
+  d3.select('#service_name_logScale').on('click', d=> {
+    let ele = d3.select('#service_name_logScale')
+    if(ele.classed('selected')){ele.classed('selected', false)}
+    else{ele.classed('selected', true)}
+    service_name_barchart.config.logScale = !service_name_barchart.config.logScale;
+    service_name_barchart.updateVis();
+  });
+  d3.select('#zipcode_logScale').on('click', d=> {
+    let ele = d3.select('#zipcode_logScale')
+    if(ele.classed('selected')){ele.classed('selected', false)}
+    else{ele.classed('selected', true)}
+    zipcode_barchart.config.logScale = !zipcode_barchart.config.logScale;
+    zipcode_barchart.updateVis();
+  });
+  
   
   

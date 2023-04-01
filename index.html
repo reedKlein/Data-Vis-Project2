@@ -10,9 +10,11 @@
 
 <body onLoad="document.getElementById('colors').options[0].selected = 'selected';">
     <div id="my-map"></div>
+    <div class="result"></div>
     <div id="map-options">
         <div id="button-bar">
-            <button type="button" class="buttons" id="heatmapButton"">Toggle Heatmap</button>
+            <button hidden type="button" class="buttons" id="clear-map">Clear Map Selection</button>
+            <button type="button" class="buttons" id="heatmapButton">Toggle Heatmap</button>
             <button type="button" class="buttons" id="map-background">Map Type Toggle</button>
             <button type="button" class="buttons" id="sidebar-button" onclick="openNav()">&#9776;</button>
         </div>
@@ -37,20 +39,76 @@
             </div>
         </div>
         <div hidden id="graph-selection">
-            <div>
+            <div style="text-align:center;">
+                <button type="button" class="buttons-graphs" id="clear-filters">Clear Filters</button>
+            </div>
+            <div class="svg-container">
+                <div class="chartH">
+                    <h1 class="chart-title">Request Dates</h1>
+                </div>
                 <svg id="requested_datetime_linechart"></svg>
+                <div class="display-options">
+                    <button type="button" class="buttons-graphs" id="filter-line">Filter Line Graph</button>
+                    <button hidden type="button" class="buttons-graphs" id="clear-line">Clear Line Selection</button>
+                </div>
             </div>
-            <div>
+            <hr>
+            <div class="svg-container">
+                <div class="chartH">
+                    <h1 class="chart-title">Day Requested</h1>
+                </div>
                 <svg id="requested_day_barchart"></svg>
+                <div class="display-options">
+                    <button type="button" class="buttons-graphs" id="requested_day_logScale">Log Scale</button>
+                </div>
             </div>
-            <div>
+            <hr>
+            <div class="svg-container">
+                <div class="chartH">
+                    <h1 class="chart-title">Service Requests</h1>
+                </div>
                 <svg id="service_name_barchart"></svg>
+                <div class="display-options">
+                    <button type="button" class="buttons-graphs" id="service_name_logScale">Log Scale</button>
+                </div>
             </div>
-            <div>
+            <hr>
+            <div class="svg-container">
+                <div class="chartH">
+                    <h1 class="chart-title">Zipcode</h1>
+                    <div>
+                        <a class="chart-moreinfo" href="https://zipdatamaps.com/zipcodes-cincinnati-oh" target="_blank" style="font-size:16px; text-align:center; margin-bottom:4px;">See Zipcodes</a>
+                    </div>
+                </div>
                 <svg id="zipcode_barchart"></svg>
+                <div class="display-options">
+                    <button type="button" class="buttons-graphs" id="zipcode_logScale">Log Scale</button>
+                </div>
             </div>
-            <div>
+            <hr>
+            <div class="svg-container">
+                <div class="chartH">
+                    <h1 class="chart-title">Days between request and update</h1>
+                    <div id="update_time_chart_filter">
+                        <div style="margin-bottom: 4px;">
+                            <span class="chart-moreinfo">Filter Range</span>
+                        </div>
+                        <input type="number" min="0" max="100" step="1" value="0" id="minBin">
+                        <label for="minBin">Min. (days)</label>
+                        <input type="number" min="1" max="100" step="1" value="40" id="maxBin">
+                        <label for="maxBin">Max. (days)</label>
+                    </div>
+                </div>
                 <svg id="update_time_chart"></svg>
+                <div class="display-options" style="height:100%; width:100%">
+                    <div style="height: 100%; width:50%; float:left;">
+                        <button type="button" class="buttons-graphs" id="update_time_logScale" style="margin-bottom:10px;">Log Scale</button>
+                    </div>
+                    <div style="height: 100%; width:50%; float:right; margin-top:10px;">
+                        <input type="number" min="1" max="100" step="1" value="20" id="nBins">
+                        <label for="nBins">Bin Count</label>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -58,14 +116,17 @@
 
     <script src="js/d3.v6.min.js"></script>
     <script src="js/leaflet.js"></script>
-    <script src="js/sideBar.js"></script>
-    <script src="js/sideBarSelection.js"></script>
-    <script type="module" src="js/generateHeatMap.js"></script>
+    <script src="../js/sideBar.js"></script>
+    <script src="../js/sideBarSelection.js"></script>
+    <script type="text/javascript" src="../node_modules/leaflet-area-select/dist/Map.SelectArea.min.js"></script>
+
+
     <script src="js/linechartFocus.js"></script>
     <script src="js/barchart.js"></script>
     <script src="js/histogram.js"></script>
     <script src="js/colorsOption.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/Map.SelectArea.js"></script>
     <script src="js/leafletMap.js"></script>
 
     <div id="tooltip"></div>

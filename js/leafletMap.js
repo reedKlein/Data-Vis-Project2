@@ -11,9 +11,10 @@ class LeafletMap {
     }
     console.log(_data);
     this.colorType = "default";
+    this.radiusSize = 4;
     this.data = _data;
-    this.initVis();
     this.initLegend();
+    this.initVis();
   }
 
   /**
@@ -51,35 +52,66 @@ class LeafletMap {
     });
 
     vis.theMap = L.map('my-map', {
+      selectArea: true,
       center: [39.15, -84.5],
       zoom: 11.5,
       layers: [vis.base_layer]
     });
-
+  
     //if you stopped here, you would just have a map
+
+    //Brushing
+    vis.theMap.selectArea.enable();    
 
     //initialize svg for d3 to add to map
     L.svg({ clickable: true }).addTo(vis.theMap)// we have to make the svg layer clickable
     vis.overlay = d3.select(vis.theMap.getPanes().overlayPane)
-    vis.svg = vis.overlay.select('svg').attr("pointer-events", "auto")
+    vis.svg = vis.overlay.select('svg').attr("pointer-events", "auto");
 
-    //these are the city locations, displayed as a set of dots 
+
+    //handler here for updating the map, as you zoom in and out           
+    vis.theMap.on("zoomend", function(){
+      vis.Dots
+        .attr("cx", d => vis.theMap.latLngToLayerPoint([d.latitude,d.longitude]).x)
+        .attr("cy", d => vis.theMap.latLngToLayerPoint([d.latitude,d.longitude]).y);
+      vis.updateHeatmap();
+    });
+
+    vis.theMap.on('areaselected', (e) => {
+      let areaSelect = e.bounds;
+      handle_filter({
+        "d0Lon": areaSelect._northEast.lng,
+        "d0Lat": areaSelect._southWest.lat,
+        "d1Lon": areaSelect._southWest.lng,
+        "d1Lat": areaSelect._northEast.lat
+      }, "areaSelect");
+      document.getElementById('clear-map').hidden = false;
+    });
+
+
+    vis.updateLegend();
+    vis.updateVis();
+  }
+
+  updateVis() {
+    let vis = this;
+
     vis.Dots = vis.svg.selectAll('circle')
       .data(vis.data)
       .join('circle')
-      .attr("fill", "steelblue")
-      .attr("stroke", "black")
-      //Leaflet has to take control of projecting points. Here we are feeding the latitude and longitude coordinates to
-      //leaflet so that it can project them on the coordinates of the view. Notice, we have to reverse lat and lon.
-      //Finally, the returned conversion produces an x and y point. We have to select the the desired one using .x or .y
-      .attr("cx", d => vis.theMap.latLngToLayerPoint([d.latitude, d.longitude]).x)
-      .attr("cy", d => vis.theMap.latLngToLayerPoint([d.latitude, d.longitude]).y)
-      .attr("r", 3)
-      .on('mouseover', function (event, d) { //function to add mouseover event
-        d3.select(this).transition() //D3 selects the object we have moused over in order to perform operations on it
-          .duration('150') //how long we are transitioning between the two states (works like keyframes)
-          .attr("fill", "red") //change the fill
-          .attr('r', 5); //change radius
+        .attr("fill", function(d){return vis.colors(d[vis.colorType])})
+        .attr("stroke", "black")
+        //Leaflet has to take control of projecting points. Here we are feeding the latitude and longitude coordinates to
+        //leaflet so that it can project them on the coordinates of the view. Notice, we have to reverse lat and lon.
+        //Finally, the returned conversion produces an x and y point. We have to select the the desired one using .x or .y
+        .attr("cx", d => vis.theMap.latLngToLayerPoint([d.latitude, d.longitude]).x)
+        .attr("cy", d => vis.theMap.latLngToLayerPoint([d.latitude, d.longitude]).y)
+        .attr("r", 4)
+        .on('mouseover', function (event, d) { //function to add mouseover event
+          d3.select(this).transition() //D3 selects the object we have moused over in order to perform operations on it
+            .duration('150') //how long we are transitioning between the two states (works like keyframes)
+            .attr("fill", "red") //change the fill
+            .attr('r', vis.radiusSize); //change radius
 
         //create a tool tip
         d3.select('#tooltip')
@@ -89,70 +121,30 @@ class LeafletMap {
           .html(`<div class="tooltip-label">Requested Date ${d.requested_date},<br /> Updated Date: ${(d.updated_date)}<br />
                                       Agency Responsible: ${(d.agency_responsible)}<br /> Description: ${(d.description)}</div>`);
 
-      })
-      .on('mousemove', (event) => {
-        //position the tooltip
-        d3.select('#tooltip')
-          .style('left', (event.pageX + 10) + 'px')
-          .style('top', (event.pageY + 10) + 'px');
-      })
-      .on('mouseleave', function () { //function to add mouseover event
-        d3.select(this).transition() //D3 selects the object we have moused over in order to perform operations on it
-          .duration('150') //how long we are transitioning between the two states (works like keyframes)
-          .attr("fill", "steelblue") //change the fill
-          .attr('r', 3) //change radius
+        })
+        .on('mousemove', (event) => {
+          //position the tooltip
+          d3.select('#tooltip')
+            .style('left', (event.pageX + 10) + 'px')
+            .style('top', (event.pageY + 10) + 'px');
+        })
+        .on('mouseleave', function () { //function to add mouseover event
+          d3.select(this).transition() //D3 selects the object we have moused over in order to perform operations on it
+            .duration('150') //how long we are transitioning between the two states (works like keyframes)
+            .attr("fill", function(d){return vis.colors(d[vis.colorType])}) //change the fill
+            .attr('r', 5) //change radius
 
-        d3.select('#tooltip').style('opacity', 0);//turn off the tooltip
+          d3.select('#tooltip').style('opacity', 0);//turn off the tooltip
 
-      })
-      .on('click', (event, d) => { //experimental feature I was trying- click on point and then fly to it
-        // vis.newZoom = vis.theMap.getZoom()+2;
-        // if( vis.newZoom > 18)
-        //  vis.newZoom = 18; 
-        // vis.theMap.flyTo([d.latitude, d.longitude], vis.newZoom);
-      });
-
-    vis.isHeatMapOn = false
-
-    //handler here for updating the map, as you zoom in and out           
-    vis.theMap.on("zoomend", function () {
-      vis.updateLegend();
-      vis.updateVis();
-      vis.updateHeatmap();
-    });
-
+        })
+        .on('click', (event, d) => { //experimental feature I was trying- click on point and then fly to it
+          // vis.newZoom = vis.theMap.getZoom()+2;
+          // if( vis.newZoom > 18)
+          //  vis.newZoom = 18; 
+          // vis.theMap.flyTo([d.latitude, d.longitude], vis.newZoom);
+        });
   }
 
-  updateVis() {
-    let vis = this;
-
-    //want to see how zoomed in you are? 
-    // console.log(vis.map.getZoom()); //how zoomed am I
-
-    //want to control the size of the radius to be a certain number of meters? 
-    vis.radiusSize = 3;
-
-    // if( vis.theMap.getZoom > 15 ){
-    //   metresPerPixel = 40075016.686 * Math.abs(Math.cos(map.getCenter().lat * Math.PI/180)) / Math.pow(2, map.getZoom()+8);
-    //   desiredMetersForPoint = 100; //or the uncertainty measure... =) 
-    //   radiusSize = desiredMetersForPoint / metresPerPixel;
-    // }
-
-    //redraw based on new zoom- need to recalculate on-screen position
-    vis.Dots
-      .attr("cx", d => vis.theMap.latLngToLayerPoint([d.latitude, d.longitude]).x)
-      .attr("cy", d => vis.theMap.latLngToLayerPoint([d.latitude, d.longitude]).y)
-      .attr("r", vis.radiusSize)
-      .attr("fill", function (d) { return vis.colors(d[vis.colorType]) })
-      // Need to update this because we're changing it back to its changed color rather than steelblue
-      .on('mouseleave', function () { //function to add mouseover event
-        d3.select(this).transition() //D3 selects the object we have moused over in order to perform operations on it
-          .duration('150') //how long we are transitioning between the two states (works like keyframes)
-          .attr("fill", function (d) { return vis.colors(d[vis.colorType]) }) //change the fill
-          .attr('r', 3) //change radius
-        d3.select('#tooltip').style('opacity', 0);//turn off the tooltip
-      })
-  }
 
   toggleHeatmap() {
     let vis = this;
@@ -297,9 +289,11 @@ class LeafletMap {
           });
           square.addEventListener('mousemove', (event) => {
             //position the tooltip
-            d3.select('#tooltip')
-              .style('left', (event.pageX + 10) + 'px')
-              .style('top', (event.pageY + 10) + 'px');
+            if(event.currentTarget.attributes[3] === "0"){
+              d3.select('#tooltip')
+                .style('left', (event.pageX + 10) + 'px')
+                .style('top', (event.pageY + 10) + 'px');
+            }
           });
 
           square.addEventListener('mouseleave', function () { //function to add mouseover event
@@ -336,7 +330,8 @@ class LeafletMap {
     if (field == "service_code") {
       myObjStruct.sort((a, b) => b.y - a.y);
       retData = myObjStruct.slice(0, 9);
-      retData.push({ x: "other", y: myObjStruct.slice(9, myObjStruct.length).reduce((partialSum, a) => partialSum + a.y, 0) });
+      let remainingData = myObjStruct.slice(9, myObjStruct.length).reduce((partialSum, a) => partialSum + a.y, 0)
+      if(remainingData > 0){ retData.push({ x: "other", y: remainingData })}
     }
     else {
       retData = myObjStruct;
@@ -349,7 +344,7 @@ class LeafletMap {
 
     vis.legend_svg = d3.select("#map-colors")
       .attr('width', 100)
-      .attr('height', 2000);
+      .attr('height', 500);
 
     vis.legend_chart = vis.legend_svg.append('g');
 
@@ -367,6 +362,7 @@ class LeafletMap {
     vis.legend_data = vis.formatColorsData(vis.data, vis.colorType);
     vis.legend_colordata = vis.legend_data.map(a => a.x);
     vis.legend_colordata.sort((a, b) => a - b);
+    vis.legend_svg.attr('height', 500);
     vis._setDataColor();
 
     vis.legend_chart.selectAll(".firstrow")
@@ -399,12 +395,13 @@ class LeafletMap {
         .range(d3.schemeSet2)
     }
     else if (vis.colorType == "updateTime") {
-      vis.colors = d3.scaleLinear().domain([0, 30])
-        .range(["green", "red"]);
+      vis.legend_svg.attr('height', 12000);
+      vis.colors = d3.scaleLinear().domain([0, 39])
+        .range(["white", "#E00122"]);
     }
     else if (vis.colorType == "request_into_year") {
-      vis.colors = d3.scaleLinear().domain([10, 11])
-        .range(["green", "red"]);
+      vis.colors = d3.scaleLinear().domain([0, 5])
+        .range(["white", "#E00122"]);
     }
   }
 }

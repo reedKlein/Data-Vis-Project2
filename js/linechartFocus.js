@@ -5,20 +5,23 @@ class FocusContextVis {
      * @param {Object}
      * @param {Array}
      */
-    constructor(_config, _data, _type) {
+    constructor(_config, _data, _type, _xAxisLab, _yAxisLab, _title) {
       this.config = {
         parentElement: _config.parentElement,
         width:  500,
         height: 200,
         contextHeight: 50,
-        margin: {top: 30, right: 15, bottom: 135, left: 45},
-        contextMargin: {top: 250, right: 0, bottom: 20, left: 25}
+        margin: {top: 30, right: 15, bottom: 130, left: 50},
+        contextMargin: {top: 250, right: 0, bottom: 5, left: 45}
       }
       _data.forEach( d => {
         d.x = new Date(d.x)
       });
       this.data = _data;
       this.type = _type;
+      this.xAxisLab = _xAxisLab;
+      this.yAxisLab = _yAxisLab
+      this.title = _title;
       this.initVis();
     }
     
@@ -27,8 +30,6 @@ class FocusContextVis {
      */
     initVis() {
       let vis = this;
-
-      console.log(vis.data);
   
       const containerWidth = vis.config.width + vis.config.margin.left + vis.config.margin.right;
       const containerHeight = vis.config.height + vis.config.margin.top + vis.config.margin.bottom;
@@ -49,10 +50,10 @@ class FocusContextVis {
   
       // Initialize axes
       vis.xAxisFocus = d3.axisBottom(vis.xScaleFocus).tickSizeOuter(0).tickFormat(d => {
-        return `${d.getMonth()}-${d.getDate()}`;
+        return `${d.getMonth() + 1}-${d.getDate()}`;
       });
       vis.xAxisContext = d3.axisBottom(vis.xScaleContext).tickSizeOuter(0).tickFormat(d => {
-        return `${d.getMonth()}-${d.getDate()}`;
+        return `${d.getMonth() + 1}-${d.getDate()}`;
       });
       vis.yAxisFocus = d3.axisLeft(vis.yScaleFocus);
   
@@ -120,8 +121,23 @@ class FocusContextVis {
             if (selection) vis.brushed(selection);
           })
           .on('end', function({selection}) {
-            if (!selection) vis.brushed(null);
+            if (!selection) vis.brushed(null); vis.selection = [];
+            if(selection) vis.selection = selection.map(vis.xScaleContext.invert, vis.xScaleContext);
           });
+
+        vis.context.append('text')
+        .attr("text-anchor", 'middle')
+        .attr('x', containerWidth/2)
+        .attr('y', 90)
+        .text(vis.xAxisLab)
+        .attr('class', 'x-axis-label');
+
+        vis.focus.append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('x', -(containerHeight/2))
+        .attr('y', -40)
+        .text(vis.yAxisLab)
+        .attr('class', 'y-axis-label');
     }
   
     /**
@@ -132,6 +148,8 @@ class FocusContextVis {
       this.data.forEach( d => {
         d.x = new Date(d.x);
       });
+
+      vis.chart_sort();
       
       vis.xValue = d => d.x;
       vis.yValue = d => d.y;
@@ -208,7 +226,7 @@ class FocusContextVis {
       vis.xAxisContextG.call(vis.xAxisContext);
   
       // Update the brush and define a default position
-      const defaultBrushSelection = [vis.xScaleFocus(new Date("11-05-2021")), vis.xScaleContext.range()[1]];
+      const defaultBrushSelection = [vis.xScaleContext.range()[0], vis.xScaleContext.range()[1]];
       vis.brushG
           .call(vis.brush)
           .call(vis.brush.move, defaultBrushSelection);
@@ -237,5 +255,17 @@ class FocusContextVis {
       vis.focusLinePath.attr('d', vis.line);
       vis.xAxisFocusG.call(vis.xAxisFocus);
       //handle_filter(vis.xScaleFocus.domain(), vis.type);
+    }
+
+    chart_sort(){
+      this.data.sort((a,b) => a.x - b.x);
+      return;
+    }
+
+    filterLine(){
+      if(this.selection.length !== 0){
+        let selectionObj = {"d0": this.selection[0], "d1": this.selection[1]};
+        handle_filter(selectionObj, "requested_datetime");
+      }
     }
   }

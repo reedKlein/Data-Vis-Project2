@@ -1,7 +1,7 @@
 /* Set the width of the sidebar to 250px and the left margin of the page content to 250px */
 function openNav() {
-    document.getElementById("sidebar").style.width = "30%";
-    document.getElementById("my-map").style.width = "70%";
+    document.getElementById("sidebar").style.width = "40%";
+    document.getElementById("my-map").style.width = "60%";
 }
 
 /* Set the width of the sidebar to 0 and the left margin of the page content to 0 */

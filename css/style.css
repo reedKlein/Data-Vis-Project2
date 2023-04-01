@@ -102,7 +102,7 @@ body {
   text-align: center;
 }
 
-#heatmapButton, #map-background, #sidebar-button {
+#heatmapButton, #map-background, #sidebar-button, #clear-map {
   position: inline-block;
   margin-top: 5px;
   margin-bottom: 8px;
@@ -157,7 +157,87 @@ body {
 
 .chart-line {
   fill: none;
-  stroke: #345454;
+  stroke: #E00122;
   stroke-width: 2px;
   clip-path: url(#clip);
+}
+
+.chart-area{
+  fill: black;
+}
+
+.chartH{
+  text-align: center;
+}
+
+.chart-title{
+  color: white;
+}
+
+.y-axis-label{
+  font-size: 15px;
+  fill: white;
+}
+
+.x-axis-label{
+  font-size: 15px;
+  fill: white;
+}
+
+label {
+  color:white;
+}
+
+.chart-moreinfo{
+  color:white;
+  font-size: 18px;
+}
+
+.svg-container{
+  text-align: center;
+}
+svg{
+  margin-left:auto;
+  margin-right:auto;
+}
+
+.buttons-graphs{
+  position: inline-block;
+  margin-top: 5px;
+  background-color: unset;
+  color: white;
+  border: 2px solid #d6d6d5;
+  border-radius: 5px;
+  font-size: 14px;
+  padding: 4px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.selected{
+  background-color: #d6d6d5;
+  color: black;
+}
+
+.tick{
+  font-size:11px;
+}
+
+.tooltip{
+  fill: white;
+}
+
+hr{
+  height: 1px;
+  background-color:#4b4b4b;
+  border: none;
+  width: 90%;
+}
+
+#clear-filters{
+  font-size: 22px;
+}
+
+.selected-bar{
+  fill:black !important;
 }
