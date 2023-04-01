@@ -50,10 +50,10 @@ class FocusContextVis {
   
       // Initialize axes
       vis.xAxisFocus = d3.axisBottom(vis.xScaleFocus).tickSizeOuter(0).tickFormat(d => {
-        return `${d.getMonth()}-${d.getDate()}`;
+        return `${d.getMonth() + 1}-${d.getDate()}`;
       });
       vis.xAxisContext = d3.axisBottom(vis.xScaleContext).tickSizeOuter(0).tickFormat(d => {
-        return `${d.getMonth()}-${d.getDate()}`;
+        return `${d.getMonth() + 1}-${d.getDate()}`;
       });
       vis.yAxisFocus = d3.axisLeft(vis.yScaleFocus);
   

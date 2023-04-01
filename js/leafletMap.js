@@ -289,9 +289,11 @@ class LeafletMap {
           });
           square.addEventListener('mousemove', (event) => {
             //position the tooltip
-            d3.select('#tooltip')
-              .style('left', (event.pageX + 10) + 'px')
-              .style('top', (event.pageY + 10) + 'px');
+            if(event.currentTarget.attributes[3] === "0"){
+              d3.select('#tooltip')
+                .style('left', (event.pageX + 10) + 'px')
+                .style('top', (event.pageY + 10) + 'px');
+            }
           });
 
           square.addEventListener('mouseleave', function () { //function to add mouseover event
@@ -342,7 +344,7 @@ class LeafletMap {
 
     vis.legend_svg = d3.select("#map-colors")
       .attr('width', 100)
-      .attr('height', 2000);
+      .attr('height', 500);
 
     vis.legend_chart = vis.legend_svg.append('g');
 
@@ -360,6 +362,7 @@ class LeafletMap {
     vis.legend_data = vis.formatColorsData(vis.data, vis.colorType);
     vis.legend_colordata = vis.legend_data.map(a => a.x);
     vis.legend_colordata.sort((a, b) => a - b);
+    vis.legend_svg.attr('height', 500);
     vis._setDataColor();
 
     vis.legend_chart.selectAll(".firstrow")
@@ -392,11 +395,12 @@ class LeafletMap {
         .range(d3.schemeSet2)
     }
     else if (vis.colorType == "updateTime") {
-      vis.colors = d3.scaleLinear().domain([0, 30])
+      vis.legend_svg.attr('height', 12000);
+      vis.colors = d3.scaleLinear().domain([0, 39])
         .range(["white", "#E00122"]);
     }
     else if (vis.colorType == "request_into_year") {
-      vis.colors = d3.scaleLinear().domain([0, 6])
+      vis.colors = d3.scaleLinear().domain([0, 5])
         .range(["white", "#E00122"]);
     }
   }

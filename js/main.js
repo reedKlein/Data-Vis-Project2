@@ -1,4 +1,3 @@
-const parseTime = d3.timeParse("%Y-%m-%d");
 var selected_filters = [];
 var charts = [];
 var master_data = [];
@@ -210,6 +209,7 @@ function update_charts(filtered_data){
   leafletMap.data = filtered_data;
   leafletMap.updateLegend();
   leafletMap.updateVis();
+  leafletMap.updateHeatmap();
 }
 
 function filtering(field){
@@ -264,12 +264,6 @@ function update_filter_selection(d, field){
   }
 }
 
-
-
-/* 
-TODO:
-
--BUTTON LAYOUT / STYLE
--MAP BRUSHING FROM KHOA?
-
-*/
+d3.select('#heatmapButton').on('click', d => {
+  leafletMap.toggleHeatmap();
+});

@@ -130,7 +130,7 @@ class Histogram{
                 d3.select('#tooltip')
                 .style('opacity', 1)
                 // Format number with million and thousand separator
-                .html(`<div class="tooltip-label">${d.x0}-${d.x1} parsecs</div>${d3.format(',')(d.length)} requests`);
+                .html(`<div class="tooltip-label">${d.x0}-${d.x1} days</div>${d3.format(',')(d.length)} requests`);
                 })
             .on("mousemove", (event) => {
                 d3.select('#tooltip')
